@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <meta name="description" content="Project 1 ">
-  <title>Project 1</title>
+  <link href="assets/images/icons8-rock-and-roll-hand-32.png" rel="shortcut icon">
+  <meta name="description" content="As a user I enter my destination and I can see the best price comparison from ride sharing services. (Lyft, Uber, etc).">
+  <title>Ride Witch</title>
 
   <!-- Font Awesome -->
   <script src="https://kit.fontawesome.com/fece22d596.js"></script>
@@ -13,11 +14,13 @@
   <!-- CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <!-- <link href="assets/css/style.css" rel="stylesheet"> -->
+  <link href="assets/css/style.css?v=1.1.2" rel="stylesheet">
+
 </head>
 
 <body>
   <!-- Main Container -->
+<<<<<<< HEAD
   <article class="content-wrapper" id="main-container">
     <section class="section-block jumbotron" id="main-section">
       <h1>Ride Witch</h1>
@@ -45,8 +48,73 @@
     <div class="col-md-3" id="right-col"></div>
     </article>
   
+=======
+  <article class="content-wrapper container" id="main-container">
 
-  <!-- Bootstrap JS -->
+    <section class="section-block jumbotron" id="title-section">
+      <h1 class="text-center">
+        <i class="fas fa-broom"></i><strong> Ride Witch</strong>
+      </h1>
+
+      <form class="d-flex justify-content-center" id="user-inputs-form">
+        <div class="form-row">
+          <div class="col">
+            <input type="text" class="form-control" id="starting-point" name="starting-point" placeholder="Start">
+          </div>
+          
+          <div class="col">
+            <input type="text" class="form-control" id="end-point" name="end-point" placeholder="End">
+          </div>
+        </div><!-- .form-row -->   
+        <button type="submit" class="btn btn-primary justify-content-end" id="submit">Submit</button>
+      </form><!-- #user-inputs-form -->
+
+    </section><!-- #title-section -->
+
+    <section class="row" id="main-section">
+      <div class="pac-card col-lg-12" id="pac-card">
+        <div>
+          <div id="title">
+            Autocomplete search
+          </div>
+          <div id="type-selector" class="pac-controls">
+            <input type="radio" name="type" id="changetype-all" checked="checked">
+            <label for="changetype-all">All</label>
+
+            <input type="radio" name="type" id="changetype-establishment">
+            <label for="changetype-establishment">Establishments</label>
+
+            <input type="radio" name="type" id="changetype-address">
+            <label for="changetype-address">Addresses</label>
+
+            <input type="radio" name="type" id="changetype-geocode">
+            <label for="changetype-geocode">Geocodes</label>
+          </div>
+          <div id="strict-bounds-selector" class="pac-controls">
+            <input type="checkbox" id="use-strict-bounds" value="">
+            <label for="use-strict-bounds">Strict Bounds</label>
+          </div>
+        </div>
+        <div id="pac-container">
+          <input id="pac-input" type="text" placeholder="Enter a location">
+        </div>
+      </div>
+>>>>>>> origin/ccollins
+
+      <div class="col-lg-12" id="map"></div><!-- #map -->
+
+      <div class="col-lg-12" id="infowindow-content">
+        <img src="" width="16" height="16" id="place-icon">
+        <span id="place-name" class="title"></span><br>
+        <span id="place-address"></span>
+      </div><!-- #infowindow-content -->
+
+    </section><!-- #main-section -->
+  </article><!-- main-container -->
+
+  <!-- jQuery, Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
@@ -56,10 +124,16 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
     crossorigin="anonymous"></script>
-
-  <!-- JS -->
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"
     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+  <!-- Google Places API -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6N-d2LB_HWEFqRiQ1LsHVowDR1aSbyIg&libraries=places&callback=initMap"
+    async defer></script>
+
+  <!-- APP JS -->
+  <script src="assets/javascript/app.js?v=1.1.2" type="text/javascript"></script>
 </body>
 
 </html>
