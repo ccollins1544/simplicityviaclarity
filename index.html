@@ -14,10 +14,8 @@
   <!-- CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link href="assets/css/style.css?v=1.1.1" rel="stylesheet">
+  <link href="assets/css/style.css?v=1.1.2" rel="stylesheet">
 
-  <!-- App Header JS -->
-  <script src="assets/javascript/app-header.js?v=1.1.1" type="text/javascript"></script>
 </head>
 
 <body>
@@ -30,15 +28,44 @@
       </h1>
     </section><!-- #title-section -->
 
-    <section class="section-block row first-row" id="main-section">
-      <div class="col-lg-12"></div>
+    <section class="row" id="main-section">
+      <div class="pac-card col-lg-12" id="pac-card">
+        <div>
+          <div id="title">
+            Autocomplete search
+          </div>
+          <div id="type-selector" class="pac-controls">
+            <input type="radio" name="type" id="changetype-all" checked="checked">
+            <label for="changetype-all">All</label>
+
+            <input type="radio" name="type" id="changetype-establishment">
+            <label for="changetype-establishment">Establishments</label>
+
+            <input type="radio" name="type" id="changetype-address">
+            <label for="changetype-address">Addresses</label>
+
+            <input type="radio" name="type" id="changetype-geocode">
+            <label for="changetype-geocode">Geocodes</label>
+          </div>
+          <div id="strict-bounds-selector" class="pac-controls">
+            <input type="checkbox" id="use-strict-bounds" value="">
+            <label for="use-strict-bounds">Strict Bounds</label>
+          </div>
+        </div>
+        <div id="pac-container">
+          <input id="pac-input" type="text" placeholder="Enter a location">
+        </div>
+      </div>
+
+      <div class="col-lg-12" id="map"></div><!-- #map -->
+
+      <div class="col-lg-12" id="infowindow-content">
+        <img src="" width="16" height="16" id="place-icon">
+        <span id="place-name" class="title"></span><br>
+        <span id="place-address"></span>
+      </div><!-- #infowindow-content -->
+
     </section><!-- #main-section -->
-
-    <section class="row" id="results">
-    </section><!-- #results -->
-
-    <section class="row" id="map"></section>
-
   </article><!-- main-container -->
 
   <!-- jQuery, Bootstrap JS -->
@@ -61,8 +88,8 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6N-d2LB_HWEFqRiQ1LsHVowDR1aSbyIg&libraries=places&callback=initMap"
     async defer></script>
 
-  <!-- APP Footer JS -->
-  <script src="assets/javascript/app-footer.js?v=1.1.1" type="text/javascript"></script>
+  <!-- APP JS -->
+  <script src="assets/javascript/app.js?v=1.1.2" type="text/javascript"></script>
 </body>
 
 </html>
