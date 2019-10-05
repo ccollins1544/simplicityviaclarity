@@ -1,23 +1,28 @@
 /*********************************************************
- * RideWitch
- * @package RideWitch
- * @subpackage app-footer
+ * Simplicity Via Clarity
+ * @package simplicityviaclarity
+ * @subpackage app
  * @author Christopher C, Blake, Sultan
- * @version 1.1.2
- * @license none (public domain)
- * 
+ * @version 2.0.0
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
- * 1. Functions
+ * 
+ * 1. Firebase
+ *   1.1 Firebase Configuration
+ *   1.2 Initialize Firebase
+ *   1.3 Firebase Authentication
+ *     1.3.1 Store CurrentUser as global
+ *     1.3.2 Initialize the FirebaseUI Widget
+ *     1.3.3 UI Configuration
+ *     1.3.4 Persist Authentication
+ * 
+ * 2. Functions
  *   1.1 ajaxGET
  *   1.2 alertMessage
  *   1.3 alertErrorMessage
  *   1.4 alertSuccessMessage
  *   1.5 updatePage
  *   1.6 deparam
- * 
- * 2. Google Functions
- *   2.1 initMap
  * 
  * 3. Document Ready
  *   3.1 Render Last Search
@@ -27,8 +32,193 @@
  *********************************************************/
 /* ===============[ 0. GLOBALS ]=========================*/
 var lastQuery;
+var visitorsTableFields = ["count" , "active-page", "page-duration", "site-duration", "ip", "geo-location"];
 
-/* ===============[ 1. Functions ]=======================*/
+/* ===============[ 1. Firebase ]=========================*/
+/**
+ * 1.1 Firebase Configuration
+ * https://firebase.google.com/docs/database/admin/retrieve-data
+ */
+var firebaseConfig = {
+  apiKey: "AIzaSyAVj1DhT_LO-Nn_YcBVhpHRgGbn2JCth6E",
+  authDomain: "ccollins-fall2019.firebaseapp.com",
+  databaseURL: "https://ccollins-fall2019.firebaseio.com",
+  projectId: "ccollins-fall2019",
+  storageBucket: "",
+  messagingSenderId: "541445299555",
+  appId: "1:541445299555:web:d9ceca0430a78546108756"
+};
+
+// 1.2 Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+var fdb = firebase.database();
+var dbRef = fdb.ref("/svc");
+
+/**
+ * 1.3 Firebase Authentication
+ */
+// 1.3.1 Store CurrentUser as global
+var CurrentUser;
+
+// 1.3.2 Initialize the FirebaseUI Widget
+var ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+/**
+ * 1.3.3 UI Configuration
+ * Sets up the signInOptions and default UI on our target DOM element #firebaseui-auth-container.
+ * Callbacks handle what happens on login success and login failure.
+ */
+var uiConfig = {
+  callbacks: {
+    signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+      // User successfully signed in.
+      // Return type determines whether we continue the redirect automatically
+      // or whether we leave that to developer to handle.
+      // return true;
+
+      console.log("Auth Result", authResult);
+      updateCurrentUser();
+      return false; // set to false because we are not redirecting to the signInSuccessUrl
+    },
+
+    // signInFailure callback must be provided to handle merge conflicts which
+    // occur when an existing credential is linked to an anonymous user.
+    signInFailure: function (error) {
+      // For merge conflicts, the error.code will be
+      // 'firebaseui/anonymous-upgrade-merge-conflict'.
+      if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
+        return Promise.resolve();
+      }
+      // The credential the user tried to sign in with.
+      var cred = error.credential;
+      // Copy data from anonymous user to permanent user and delete anonymous
+      // user.
+      // ...
+      // Finish sign-in after data is copied.
+      return firebase.auth().signInWithCredential(cred);
+    },
+    uiShown: function () {
+      // The widget is rendered.
+      // Hide the loader.
+      document.getElementById('loader').style.display = 'none';
+    }
+  },
+
+
+  // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+  signInFlow: 'popup',
+
+  // Whether to upgrade anonymous users should be explicitly provided.
+  // The user must already be signed in anonymously before FirebaseUI is
+  // rendered.
+  autoUpgradeAnonymousUsers: true,
+  signInSuccessUrl: '/',
+  signInOptions: [{
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      requireDisplayName: false
+    },
+    {
+      provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      scopes: [
+        'https://www.googleapis.com/auth/contacts.readonly'
+      ],
+      customParameters: {
+        // Forces account selection even when one account
+        // is available.
+        prompt: 'select_account'
+      }
+    },
+    firebase.auth.GithubAuthProvider.PROVIDER_ID
+  ],
+  // Terms of service url.
+  // tosUrl: '<your-tos-url>',
+  // Privacy policy url.
+  // privacyPolicyUrl: '<your-privacy-policy-url>'
+}; // END uiConfig
+
+// The start method will wait until the DOM is loaded.
+ui.start('#firebaseui-auth-container', uiConfig);
+
+/**
+ * 1.3.4 Persist Authentication
+ * https://firebase.google.com/docs/auth/web/auth-state-persistence
+ * NOTE: The default is Persistance.LOCAL which means we don't need to worry about setting persistance
+ * unless we want to persist when the current tab is open. The main issue I was having before was 
+ * I needed to delay the function updateCurrentUser by 500milliseconds before page load in order 
+ * to capture the CurrentUser.
+ *************************************************************************************************
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION).then(function () {
+  // Existing and future Auth states are now persisted in the current
+  // session only. Closing the window would clear any existing state even
+  // if a user forgets to sign out.
+  // ...
+  // New sign-in will be persisted with session persistence.
+  return firebase.auth().signInWithEmailAndPassword(email, password);
+
+}).catch(function (error) {
+  // Handle Errors here.
+  var errorCode = error.code;
+  var errorMessage = error.message;
+});
+*/
+
+/**
+ * 2.9 updateCurrentUser
+ * Gets the currently signed-in user if there is one. 
+ */
+var updateCurrentUser = function () {
+  if (firebase.auth().currentUser !== null) {
+    // User is signed in.
+    CurrentUser = firebase.auth().currentUser;
+    
+    if($(window).width() > 768 ){
+      $("#main-nav").slideDown();
+    }else{
+      $("#mobile-nav").slideDown();
+    }
+
+    $("#sign-out").show();
+    $("#admin-login").hide();
+    $("#user-display-name").html("Hello, " + CurrentUser.displayName + "&nbsp;&nbsp;&nbsp;|");
+
+  } else {
+    // No user is signed in.
+    CurrentUser = null; // Force this to be null
+  
+    if($(window).width() > 768 ){
+      $("#main-nav").slideUp();
+    }else{
+      $("#mobile-nav").slideUp();
+    }
+
+    $("#sign-out").hide();
+    $("#admin-login").show();
+    $("#user-display-name").empty();
+  }
+
+  // updateTrainSchedule();
+  return;
+}; // END CurrentUser
+
+/**
+ * 2.10 SignOut
+ */
+var SignOut = function () {
+  firebase.auth().signOut().then(function () {
+    // Sign-out successful.
+    updateCurrentUser();
+
+    // The start method will wait until the DOM is loaded.
+    ui.start('#firebaseui-auth-container', uiConfig);
+    console.log("Sign-out Successful");
+
+  }).catch(function (error) {
+    // An error happened.
+    console.log("An Error happened", error);
+  });
+}; // END SignOut
+
+/* ===============[ 2. Functions ]=======================*/
 /**
  * 1.1 ajaxGET
  * @param {string} ajaxURL 
@@ -163,111 +353,20 @@ deparam = function (querystring) {
   return params;
 }; // END deparam
 
-/* ===============[ 2. Google Functions ]==================*/
-/**
- * 2.1 initMap
- */
-function initMap() {
-  var map = new google.maps.Map(document.getElementById('map'), {
-    center: {
-      lat: 40.569586,
-      lng: -111.894364
-    },
-    zoom: 13
-  });
-  var card = document.getElementById('pac-card');
-  var input = document.getElementById('pac-input');
-  var types = document.getElementById('type-selector');
-  var strictBounds = document.getElementById('strict-bounds-selector');
-
-  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(card);
-
-  var autocomplete = new google.maps.places.Autocomplete(input);
-
-  // Bind the map's bounds (viewport) property to the autocomplete object,
-  // so that the autocomplete requests use the current map bounds for the
-  // bounds option in the request.
-  autocomplete.bindTo('bounds', map);
-
-  // Set the data fields to return when the user selects a place.
-  autocomplete.setFields(
-    ['address_components', 'geometry', 'icon', 'name']);
-
-  var infowindow = new google.maps.InfoWindow();
-  var infowindowContent = document.getElementById('infowindow-content');
-  infowindow.setContent(infowindowContent);
-  var marker = new google.maps.Marker({
-    map: map,
-    anchorPoint: new google.maps.Point(0, -29)
-  });
-
-  autocomplete.addListener('place_changed', function () {
-    infowindow.close();
-    marker.setVisible(false);
-    var place = autocomplete.getPlace();
-    if (!place.geometry) {
-      // User entered the name of a Place that was not suggested and
-      // pressed the Enter key, or the Place Details request failed.
-      window.alert("No details available for input: '" + place.name + "'");
-      return;
-    }
-
-    // If the place has a geometry, then present it on a map.
-    if (place.geometry.viewport) {
-      map.fitBounds(place.geometry.viewport);
-    } else {
-      map.setCenter(place.geometry.location);
-      map.setZoom(17); // Why 17? Because it looks good.
-    }
-    marker.setPosition(place.geometry.location);
-    marker.setVisible(true);
-
-    var address = '';
-    if (place.address_components) {
-      address = [
-        (place.address_components[0] && place.address_components[0].short_name || ''),
-        (place.address_components[1] && place.address_components[1].short_name || ''),
-        (place.address_components[2] && place.address_components[2].short_name || '')
-      ].join(' ');
-    }
-
-    infowindowContent.children['place-icon'].src = place.icon;
-    infowindowContent.children['place-name'].textContent = place.name;
-    infowindowContent.children['place-address'].textContent = address;
-    infowindow.open(map, marker);
-  });
-
-  // Sets a listener on a radio button to change the filter type on Places
-  // Autocomplete.
-  function setupClickListener(id, types) {
-    var radioButton = document.getElementById(id);
-    radioButton.addEventListener('click', function () {
-      autocomplete.setTypes(types);
-    });
-  }
-
-  setupClickListener('changetype-all', []);
-  setupClickListener('changetype-address', ['address']);
-  setupClickListener('changetype-establishment', ['establishment']);
-  setupClickListener('changetype-geocode', ['geocode']);
-
-  document.getElementById('use-strict-bounds')
-    .addEventListener('click', function () {
-      console.log('Checkbox clicked! New state=' + this.checked);
-      autocomplete.setOptions({
-        strictBounds: this.checked
-      });
-    });
-} // END initMap
-
 /* ===============[ 3. Document Ready ]==================*/
 $(function () {
+  // 3.1 Check if User Logged In and update CurrentUser global
+  // $("#sign-in").show();
+  $("#sign-out").hide();
+  $("#user-display-name").empty();
+  setTimeout(updateCurrentUser, 1000);
+  
   /**
-   * 3.1 Render Last Search
+   * 3.2 Render Last Search
    */
 
   /**
-   * 3.2 Set Up Clickable elements
+   * 3.3 Set Up Clickable elements
    */
 });
 
