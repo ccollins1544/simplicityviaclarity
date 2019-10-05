@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link href="assets/images/icons8-rock-and-roll-hand-32.png" rel="shortcut icon">
-  <meta name="description" content="As a user I enter my destination and I can see the best price comparison from ride sharing services. (Lyft, Uber, etc).">
-  <title>Ride Witch</title>
+  <meta name="description"
+    content="As a user I would like to know who is visiting my website and see what pages they are on as well as user activity.">
+  <title>Simplicity via Clarity</title>
 
   <!-- Font Awesome -->
   <script src="https://kit.fontawesome.com/fece22d596.js"></script>
@@ -14,77 +15,100 @@
   <!-- CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link href="assets/css/style.css?v=1.1.2" rel="stylesheet">
+  <link href="assets/css/style.css?v=2.0.0" rel="stylesheet">
 
+  <!-- Simplicity Via Clarity Listener JS 
+  <script src="assets/javascript/app-listener.js?v=2.0.0" type="text/javascript"></script> -->
 </head>
 
 <body>
+  <!-- Header -->
+  <header id="main-header">
+    <div class="container-fluid clearfix">
+      <!-- Main Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="main-nav">
+        <!-- <a class="navbar-brand mb-0 h1" href="/"></a> -->
+
+        <div class="collapse navbar-collapse show">
+          <ul class="navbar-nav ml-auto">
+            <!-- Links -->
+            <li class="nav-item">
+              <span class="nav-link" id="user-display-name"></span>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" id="sign-out" onclick="SignOut();">Logout</a>
+            </li>
+          </ul>
+        </div><!-- .navbar-collapse -->
+      </nav><!-- #main-nav -->
+
+      <!-- Mobile Navbar -->
+      <div class="pos-f-t navbar-dark" id="mobile-nav">
+        <!-- Navbar brand -->
+        <!-- <a class="navbar-brand mb-0 h1" href="#"></a> -->
+
+        <nav class="navbar navbar-dark bg-dark">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleMenu"
+            aria-controls="navbarToggleMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </nav>
+
+        <div class="collapse navbar-collapse" id="navbarToggleMenu">
+          <div class="bg-dark p-3">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+                <span class="nav-link" id="user-display-name"></span>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" id="sign-out" onclick="SignOut();">Sign Out</a>
+              </li>
+            </ul>
+          </div><!-- .bg-dark -->
+        </div><!-- #navbarToggleMenu -->
+      </div><!-- #mobile-nav -->
+
+    </div><!-- .container-fluid -->
+  </header><!-- #main-header -->
+
   <!-- Main Container -->
   <article class="content-wrapper container" id="main-container">
 
     <section class="section-block jumbotron" id="title-section">
       <h1 class="text-center">
-        <i class="fas fa-broom"></i><strong> Ride Witch</strong>
+        <i class="far fa-chart-bar"></i><strong> Simplicity via Clarity</strong>
       </h1>
-
+      <!-- 
       <form class="d-flex justify-content-center" id="user-inputs-form">
         <div class="form-row">
           <div class="col">
             <input type="text" class="form-control" id="starting-point" name="starting-point" placeholder="Start">
           </div>
-          
+
           <div class="col">
             <input type="text" class="form-control" id="end-point" name="end-point" placeholder="End">
           </div>
-        </div><!-- .form-row -->   
+        </div>
         <button type="submit" class="btn btn-primary justify-content-end" id="submit">Submit</button>
-      </form><!-- #user-inputs-form -->
+      </form> -->
 
     </section><!-- #title-section -->
 
     <section class="row" id="main-section">
-      <div class="pac-card col-lg-12" id="pac-card">
-        <div>
-          <div id="title">
-            Autocomplete search
-          </div>
-          <div id="type-selector" class="pac-controls">
-            <input type="radio" name="type" id="changetype-all" checked="checked">
-            <label for="changetype-all">All</label>
-
-            <input type="radio" name="type" id="changetype-establishment">
-            <label for="changetype-establishment">Establishments</label>
-
-            <input type="radio" name="type" id="changetype-address">
-            <label for="changetype-address">Addresses</label>
-
-            <input type="radio" name="type" id="changetype-geocode">
-            <label for="changetype-geocode">Geocodes</label>
-          </div>
-          <div id="strict-bounds-selector" class="pac-controls">
-            <input type="checkbox" id="use-strict-bounds" value="">
-            <label for="use-strict-bounds">Strict Bounds</label>
-          </div>
+      <div class="card border-primary mb-3 col-lg-12" id="admin-login">
+        <div class="card-header text-center">
+          <h5 class="card-title">Admin Login</h5>
         </div>
-        <div id="pac-container">
-          <input id="pac-input" type="text" placeholder="Enter a location">
+        <div class="card-body text-primary">
+          <div id="firebaseui-auth-container"></div>
+          <p id="loader">Loading...</p>
         </div>
       </div>
-
-      <div class="col-lg-12" id="map"></div><!-- #map -->
-
-      <div class="col-lg-12" id="infowindow-content">
-        <img src="" width="16" height="16" id="place-icon">
-        <span id="place-name" class="title"></span><br>
-        <span id="place-address"></span>
-      </div><!-- #infowindow-content -->
-
     </section><!-- #main-section -->
+
   </article><!-- main-container -->
 
   <!-- jQuery, Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
-    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
@@ -97,13 +121,18 @@
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"
     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 
-  <!-- Google Places API -->
-  <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6N-d2LB_HWEFqRiQ1LsHVowDR1aSbyIg&libraries=places&callback=initMap"
-    async defer></script>
+  <!-- Firebase References -->
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-database.js"></script>
+  <!-- <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-analytics.js"></script> -->
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-firestore.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
 
-  <!-- APP JS -->
-  <script src="assets/javascript/app.js?v=1.1.2" type="text/javascript"></script>
+  <!-- Moment, APP JS -->
+  <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+  <script src="assets/javascript/app.js?v=2.0.0" type="text/javascript"></script>
 </body>
 
 </html>

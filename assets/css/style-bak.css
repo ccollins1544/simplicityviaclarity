@@ -1,7 +1,7 @@
 /**
  * MAIN CSS
  * Author:  Christopher Collins
- * Version: 2.0.0
+ * Version: 1.1.2
  * License: none (public domain)
  */
 /*------------------------------------------------------
@@ -21,7 +21,7 @@
 
 3.0 MAIN LAYOUT INFO
   3.1 AVATAR
-  3.2 Admin Login
+  3.2 Google Map
 
 4.0 FOOTER
   4.1 Footer Links and Credits
@@ -106,7 +106,7 @@ article#main-container {
   padding: 30px 15px;
   background-color: var(--body-background);
   border-color: var(--primary-menu-background);
-  box-shadow: 0px 12px 24px -6px var(--primary-menu-background);
+  box-shadow: 0px 12px 18px -6px var(--primary-menu-background);
 }
 
 .container-fluid {
@@ -565,26 +565,82 @@ img {
   box-shadow: 0px 12px 18px -6px var(--primary-menu-background);
 }
 
-/* 3.2 Admin Login (#admin-login)
-/*------------------------------------------------------*/
-#admin-login {
-  padding: 0px;
+/* 3.2 Google Map 
+/*------------------------------------------------------
+Always set the map height explicitly to define the size of the div
+element that contains the map. 
+*/
+#map,
+#main-section {
+  height: 100%;
 }
 
-.card-header {
-  background: var(--primary-menu-background);
+#description {
+  font-family: Roboto;
+  font-size: 15px;
+  font-weight: 300;
 }
 
-.card-title {
-  color: var(--secondary-menu-text);
+#infowindow-content .title {
+  font-weight: bold;
 }
 
-.border-primary {
-  border-color: var(--body-text) !important;
+#infowindow-content {
+  display: none;
 }
 
-.text-primary {
-  color: var(--body-text) !important;
+#map #infowindow-content {
+  display: inline;
+}
+
+.pac-card {
+  margin: 10px 10px 0 0;
+  border-radius: 2px 0 0 2px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  font-family: Roboto;
+}
+
+#pac-container {
+  padding-bottom: 12px;
+  margin-right: 12px;
+}
+
+.pac-controls {
+  display: inline-block;
+  padding: 5px 11px;
+}
+
+.pac-controls label {
+  font-family: Roboto;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+#pac-input {
+  background-color: #fff;
+  font-family: Roboto;
+  font-size: 15px;
+  font-weight: 300;
+  margin-left: 12px;
+  padding: 0 11px 0 13px;
+  text-overflow: ellipsis;
+  width: 400px;
+}
+
+#pac-input:focus {
+  border-color: #4d90fe;
+}
+
+#title {
+  color: #fff;
+  background-color: #4d90fe;
+  font-size: 25px;
+  font-weight: 500;
+  padding: 6px 12px;
 }
 
 /*------------------------------------------------------*/
