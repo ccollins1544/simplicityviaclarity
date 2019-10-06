@@ -178,6 +178,9 @@ function _checkfirebaseforip(dataObj) {
     }, function (errorObject) {
       console.log("The read failed: " + errorObject.code);
     }); // END _dbRef.once('value', function(snapshot){
+      
+  }else{
+    _pushChild(dataObj)
   } // END if (dataObj.hasOwnProperty('key')) {
   return;
 } // END _checkfirebaseforip
