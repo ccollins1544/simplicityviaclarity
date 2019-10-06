@@ -15,6 +15,10 @@
  *     1.3.2 Initialize the FirebaseUI Widget
  *     1.3.3 UI Configuration
  *     1.3.4 Persist Authentication
+ *     1.3.5 updateCurrentUser
+ *     1.3.6 SignOut
+ * 
+ *   1.4 Active Viewers Counter
  * 
  * 2. Functions
  *   1.1 ajaxGET
@@ -50,9 +54,16 @@ var firebaseConfig = {
 };
 
 // 1.2 Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if( !firebase.apps.length ){
+  firebase.initializeApp(firebaseConfig);
+}
+
 var fdb = firebase.database();
 var dbRef = fdb.ref("/svc");
+
+// connectionsRef references a specific location in our database.
+// All of our connections will be stored in this directory.
+var connectionsRef = fdb.ref("/svc/connections");
 
 /**
  * 1.3 Firebase Authentication
@@ -163,7 +174,7 @@ firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION).then(func
 */
 
 /**
- * 2.9 updateCurrentUser
+ * 1.3.5 updateCurrentUser
  * Gets the currently signed-in user if there is one. 
  */
 var updateCurrentUser = function () {
@@ -179,7 +190,10 @@ var updateCurrentUser = function () {
 
     $("#sign-out").show();
     $("#admin-login").hide();
-    $("#user-display-name").html("Hello, " + CurrentUser.displayName + "&nbsp;&nbsp;&nbsp;|");
+    var displayText = $("<h5>").html(CurrentUser.displayName);
+    var displayImage = $("<img>").addClass("rounded").attr("src", CurrentUser.photoURL);
+    displayImage = $("<div>").addClass("text-center d-flex justify-center align-self-start image_wrap").html(displayImage);
+    $("#user-display-name").append(displayText, displayImage);
 
   } else {
     // No user is signed in.
@@ -196,12 +210,14 @@ var updateCurrentUser = function () {
     $("#user-display-name").empty();
   }
 
+  console.log("Current User:", CurrentUser);
+
   // updateTrainSchedule();
   return;
 }; // END CurrentUser
 
 /**
- * 2.10 SignOut
+ * 1.3.6 SignOut
  */
 var SignOut = function () {
   firebase.auth().signOut().then(function () {
@@ -218,9 +234,17 @@ var SignOut = function () {
   });
 }; // END SignOut
 
+// 1.4 Active Viewers Counter
+connectionsRef.on("value", function (snapshot) {
+
+  // Display the viewer count in the html.
+  // The number of online users is the number of children in the connections list.
+  $("#watchers").text(snapshot.numChildren());
+});
+
 /* ===============[ 2. Functions ]=======================*/
 /**
- * 1.1 ajaxGET
+ * 2.1 ajaxGET
  * @param {string} ajaxURL 
  * @param {function} cb - callback function on finish.
  * @param {function} cbErr - callback function on error.
@@ -248,7 +272,7 @@ var ajaxGET = function (ajaxURL, cb, cbErr) {
 };
 
 /**
- * 1.2 alertMessage
+ * 2.2 alertMessage
  * @param {string} message 
  * @param {string} addThisClass 
  */
@@ -287,7 +311,7 @@ function alertMessage(message = "", addThisClass = "info") {
 }
 
 /**
- * 1.3 alertErrorMessage
+ * 2.3 alertErrorMessage
  */
 function alertErrorMessage() {
   if (arguments.length === 1) {
@@ -300,7 +324,7 @@ function alertErrorMessage() {
 }
 
 /**
- * 1.4 alertSuccessMessage
+ * 2.4 alertSuccessMessage
  */
 function alertSuccessMessage() {
   if (arguments.length === 1) {
@@ -313,7 +337,7 @@ function alertSuccessMessage() {
 }
 
 /**
- * 1.5 updatePage
+ * 2.5 updatePage
  * @param {JSON} response 
  */
 function updatePage(response) {
@@ -335,7 +359,7 @@ function updatePage(response) {
 }
 
 /**
- * 1.6 deparam
+ * 2.6 deparam
  * returns the reverse of $.param
  */
 deparam = function (querystring) {

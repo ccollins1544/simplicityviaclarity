@@ -17,8 +17,6 @@
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link href="assets/css/style.css?v=2.0.0" rel="stylesheet">
 
-  <!-- Simplicity Via Clarity Listener JS 
-  <script src="assets/javascript/app-listener.js?v=2.0.0" type="text/javascript"></script> -->
 </head>
 
 <body>
@@ -27,14 +25,14 @@
     <div class="container-fluid clearfix">
       <!-- Main Navbar -->
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="main-nav">
-        <!-- <a class="navbar-brand mb-0 h1" href="/"></a> -->
+        <a class="navbar-brand mb-0 h1" href="/" id="user-display-name"></a>
 
         <div class="collapse navbar-collapse show">
           <ul class="navbar-nav ml-auto">
             <!-- Links -->
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <span class="nav-link" id="user-display-name"></span>
-            </li>
+            </li> -->
             <li class="nav-item active">
               <a class="nav-link" id="sign-out" onclick="SignOut();">Logout</a>
             </li>
@@ -78,19 +76,7 @@
       <h1 class="text-center">
         <i class="far fa-chart-bar"></i><strong> Simplicity via Clarity</strong>
       </h1>
-      <!-- 
-      <form class="d-flex justify-content-center" id="user-inputs-form">
-        <div class="form-row">
-          <div class="col">
-            <input type="text" class="form-control" id="starting-point" name="starting-point" placeholder="Start">
-          </div>
-
-          <div class="col">
-            <input type="text" class="form-control" id="end-point" name="end-point" placeholder="End">
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary justify-content-end" id="submit">Submit</button>
-      </form> -->
+      <h3 class="text-center" id="watchers"></h3>
 
     </section><!-- #title-section -->
 
@@ -129,6 +115,9 @@
   <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-firestore.js"></script>
   <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
+  <!-- Simplicity Via Clarity Listener JS -->
+  <script src="assets/javascript/app-listener.js?v=2.0.0" type="text/javascript"></script>
 
   <!-- Moment, APP JS -->
   <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
