@@ -179,7 +179,12 @@ var updateCurrentUser = function () {
 
     $("#sign-out").show();
     $("#admin-login").hide();
-    $("#user-display-name").html("Hello, " + CurrentUser.displayName + "&nbsp;&nbsp;&nbsp;|");
+    var displayText = $("<h5>").html(CurrentUser.displayName);
+    var displayImage = $("<img>").addClass("rounded").attr("src", CurrentUser.photoURL);
+    displayImage = $("<div>").addClass("text-center d-flex justify-center align-self-start image_wrap").html(displayImage);
+    $("#user-display-name").append(displayText, displayImage);
+
+    console.log(CurrentUser.photoURL);
 
   } else {
     // No user is signed in.
@@ -195,6 +200,8 @@ var updateCurrentUser = function () {
     $("#admin-login").show();
     $("#user-display-name").empty();
   }
+
+  console.log("Current User:", CurrentUser);
 
   // updateTrainSchedule();
   return;
