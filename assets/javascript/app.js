@@ -184,8 +184,6 @@ var updateCurrentUser = function () {
     displayImage = $("<div>").addClass("text-center d-flex justify-center align-self-start image_wrap").html(displayImage);
     $("#user-display-name").append(displayText, displayImage);
 
-    console.log(CurrentUser.photoURL);
-
   } else {
     // No user is signed in.
     CurrentUser = null; // Force this to be null
