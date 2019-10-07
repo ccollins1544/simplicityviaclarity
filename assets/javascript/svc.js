@@ -14,11 +14,12 @@
  *     1.3.1 Store CurrentUser as global
  *     1.3.2 Initialize the FirebaseUI Widget
  *     1.3.3 UI Configuration
- *     1.3.4 Persist Authentication
- *     1.3.5 updateCurrentUser
- *     1.3.6 SignOut
+ *     1.3.4 updateCurrentUser
+ *     1.3.5 SignOut
  * 
  *   1.4 Active Viewers Watcher
+ *     1.4.1 Watch for new connections
+ *     1.4.2 Detect Connection Removed
  * 
  * 2. Functions
  *   2.1 ajaxGET
@@ -29,10 +30,12 @@
  *   2.6 deparam
  *   2.7 startClock
  *   2.8 updateActiveVisitorsTable
+ *   2.9 RemoveFromVisitorsTable
+ *   2.10 updateVistorsTableDuration
  * 
  * 3. Document Ready
- *   3.1 Render Last Search
- *   3.2 Set Up Clickable elements
+ *   3.1 Check if User Logged In and update CurrentUser global
+ *   3.2 Start Clock and Update Page
  * 
  * A. Debugging
  *   A.1 Delete All SVC Data
@@ -154,30 +157,7 @@ var uiConfig = {
 ui.start('#firebaseui-auth-container', uiConfig);
 
 /**
- * 1.3.4 Persist Authentication
- * https://firebase.google.com/docs/auth/web/auth-state-persistence
- * NOTE: The default is Persistance.LOCAL which means we don't need to worry about setting persistance
- * unless we want to persist when the current tab is open. The main issue I was having before was 
- * I needed to delay the function updateCurrentUser by 500milliseconds before page load in order 
- * to capture the CurrentUser.
- *************************************************************************************************
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION).then(function () {
-  // Existing and future Auth states are now persisted in the current
-  // session only. Closing the window would clear any existing state even
-  // if a user forgets to sign out.
-  // ...
-  // New sign-in will be persisted with session persistence.
-  return firebase.auth().signInWithEmailAndPassword(email, password);
-
-}).catch(function (error) {
-  // Handle Errors here.
-  var errorCode = error.code;
-  var errorMessage = error.message;
-});
-*/
-
-/**
- * 1.3.5 updateCurrentUser
+ * 1.3.4 updateCurrentUser
  * Gets the currently signed-in user if there is one. 
  */
 var updateCurrentUser = function () {
@@ -228,12 +208,11 @@ var updateCurrentUser = function () {
   }
 
   console.log("Current User:", CurrentUser);
-  // updateTrainSchedule();
   return;
 }; // END CurrentUser
 
 /**
- * 1.3.6 SignOut
+ * 1.3.5 SignOut
  */
 var SignOut = function () {
   firebase.auth().signOut().then(function () {
@@ -248,9 +227,12 @@ var SignOut = function () {
     // An error happened.
     console.log("An Error happened", error);
   });
+
+  return;
 }; // END SignOut
 
-//-------------------------------------[ 1.4 Active Viewers Watcher ]---------------------------
+//-------------------------------------[ 1.4 Active Viewers Watcher - START ]---------------------------
+// 1.4.1 Watch for new connections
 connectionsRef.on("value", function (snapshot) {
   // Display the viewer count in the html.
   // The number of online users is the number of children in the connections list.
@@ -258,40 +240,40 @@ connectionsRef.on("value", function (snapshot) {
 
   var tableData = {};
   var uniqueKey = false;
-  for(var i in snapshot.val()){
+  for (var i in snapshot.val()) {
     if (snapshot.val().hasOwnProperty(i)) {
       // console.log(i + " : " + snapshot.val()[i]);
-      for(var property in snapshot.val()[i]){
+      for (var property in snapshot.val()[i]) {
         uniqueKey = i;
 
         if (visitorsTableFields.includes(property)) {
           tableData[property] = snapshot.val()[i][property];
-        
-        }else if(property === "ip" && snapshot.val()[i][property].hasOwnProperty('address')){
+
+        } else if (property === "ip" && snapshot.val()[i][property].hasOwnProperty('address')) {
           tableData["ip-address"] = snapshot.val()[i][property]['address'];
-          
-          if(snapshot.val()[i][property].hasOwnProperty('city')){
+
+          if (snapshot.val()[i][property].hasOwnProperty('city')) {
             tableData["geo-location"] = snapshot.val()[i][property]['city'];
 
-            if(snapshot.val()[i][property].hasOwnProperty('latitude') && snapshot.val()[i][property].hasOwnProperty('longitude')){
+            if (snapshot.val()[i][property].hasOwnProperty('latitude') && snapshot.val()[i][property].hasOwnProperty('longitude')) {
               tableData["latitude"] = snapshot.val()[i][property]['latitude'];
               tableData["longitude"] = snapshot.val()[i][property]['longitude'];
             }
 
-          }else{
+          } else {
             tableData["geo-location"] = "unknown";
           }
 
-        }else if(property === "dateAdded"){
+        } else if (property === "dateAdded") {
           tableData["page-duration"] = moment(snapshot.val()[i][property]).fromNow(true);
           tableData["date_added"] = snapshot.val()[i][property];
 
-        }else if(property === "pages" && snapshot.val()[i][property].length > 0){
+        } else if (property === "pages" && snapshot.val()[i][property].length > 0) {
           var all_pages = "";
-          for (var p in snapshot.val()[i][property]){
+          for (var p in snapshot.val()[i][property]) {
             all_pages += snapshot.val()[i][property][p]['page'] + ", ";
           }
-          
+
           all_pages = all_pages.replace(/,\s*$/, "");
           tableData["pages"] = all_pages;
         }
@@ -306,14 +288,12 @@ connectionsRef.on("value", function (snapshot) {
   console.log("The read failed: " + errorObject.code);
 });
 
-// Detect Connection Removed
-connectionsRef.on('child_removed', function(oldChildSnapshot){
+// 1.4.2 Detect Connection Removed
+connectionsRef.on('child_removed', function (oldChildSnapshot) {
   var keyRemoved = oldChildSnapshot.key;
-  console.log("Child " + keyRemoved + " was removed");
   $("#" + keyRemoved).remove();
 });
-
-//-------------------------------------[ Active Viewers Watcher ]---------------------------
+//-------------------------------------[ Active Viewers Watcher - END ]---------------------------
 
 /* ===============[ 2. Functions ]=======================*/
 /**
@@ -342,7 +322,7 @@ var ajaxGET = function (ajaxURL, cb, cbErr) {
   }).then(cb);
 
   return;
-};
+}; // END ajaxGET
 
 /**
  * 2.2 alertMessage
@@ -381,7 +361,7 @@ function alertMessage(message = "", addThisClass = "info") {
   alertElement.html(message);
   $("#main-section").prepend(alertElement);
   return;
-}
+} // END alertMessage
 
 /**
  * 2.3 alertErrorMessage
@@ -394,7 +374,7 @@ function alertErrorMessage() {
   for (var i = 0; i < arguments.length; i++) {
     return alertErrorMessage(arguments[i]);
   }
-}
+} // END alertErrorMessage
 
 /**
  * 2.4 alertSuccessMessage
@@ -407,7 +387,7 @@ function alertSuccessMessage() {
   for (var i = 0; i < arguments.length; i++) {
     return alertSuccessMessage(arguments[i]);
   }
-}
+} // END alertSuccessMessage
 
 /**
  * 2.5 updatePage
@@ -423,13 +403,12 @@ function updatePage(response) {
   console.log(queryParams);
 
   if (lastQuery.split("/").indexOf("maps.googleapis.com") !== -1) {
-
     // var DIV = $("div>").html()
     // resultsDiv.prepend(DIV);
   }
 
   return;
-}
+} // END updatePage
 
 /**
  * 2.6 deparam
@@ -481,19 +460,19 @@ function AddToVisitorsTable(tableRowObj) {
     if (tableRowObj.hasOwnProperty(KEY)) {
       var VALUE = tableRowObj[KEY];
 
-      if(KEY === "page-duration" && tableRowObj.hasOwnProperty('date_added')){
+      if (KEY === "page-duration" && tableRowObj.hasOwnProperty('date_added')) {
         newRow.append(
           $("<td>").attr("data-date-added", tableRowObj['date_added']).text(VALUE)
         );
 
-      }else{
+      } else {
 
         newRow.append(
           $("<td>").text(VALUE)
         );
       }
 
-    }else{
+    } else {
       newRow.append(
         $("<td>").text(" ")
       );
@@ -503,13 +482,12 @@ function AddToVisitorsTable(tableRowObj) {
   if (tableRowObj.hasOwnProperty('key')) {
     newRow.attr("id", tableRowObj['key']);
 
-    if( $("#" + tableRowObj['key']).length === 0){
+    if ($("#" + tableRowObj['key']).length === 0) {
       $("#active-visitors-table > tbody").append(newRow);
     }
   }
-  
-  console.log("called AddtoVisitorTable");
-  console.log(tableRowObj);
+
+  return;
 } // END AddToVisitorsTable
 
 /**
@@ -517,7 +495,7 @@ function AddToVisitorsTable(tableRowObj) {
  * Removes a row from #active-visitors-table table body. 
  * @param {object} tableRowObj - properties in this object must be inside the global visitorsTableFields
  */
-function RemoveFromVisitorsTable(uniqueKey){
+function RemoveFromVisitorsTable(uniqueKey) {
   if (CurrentUser === undefined && CurrentUser === null) {
     return;
   }
@@ -533,42 +511,43 @@ function RemoveFromVisitorsTable(uniqueKey){
 
   var trID = "#" + uniqueKey;
   $(trID).remove();
+  
+  return;
 } // END RemoveFromVisitorsTable
 
-function updateVistorsTableDuration(){
+/**
+ * 2.10 updateVistorsTableDuration
+ * Updates the page duration column based on date-added.
+ */
+function updateVistorsTableDuration() {
   $("#active-visitors-table > tbody tr").each(function (i, el) {
-    var page_duration = $(el).find("td:nth-child(3)").data("date-added");  
+    var page_duration = $(el).find("td:nth-child(3)").data("date-added");
 
     // page_duration = moment().diff(moment(page_duration), "minutes");
     page_duration = moment(page_duration).fromNow(true);
     $(el).find("td:nth-child(3)").text(page_duration);
     // console.log("page_duration:", page_duration);
   });
-}
+
+  return;
+} // END updateVistorsTableDuration
 
 /* ===============[ 3. Document Ready ]==================*/
 $(function () {
   // 3.1 Check if User Logged In and update CurrentUser global
-  // $("#sign-in").show();
   $("#sign-out").hide();
   setTimeout(updateCurrentUser, 1000);
 
   /**
-   * Start Clock
+   * 3.2 Start Clock and Update Page
    */
   startClock();
-  setInterval(updateVistorsTableDuration, 10 * 1000);
-
-  /**
-   * 3.3 Set Up Clickable elements
-   */
-
+  setInterval(updateVistorsTableDuration, 30 * 1000);
 
   // setTimeout(deleteAllSVCData, 10 * 1000);
-});
+}); // END document ready
 
 /* ===============[ A. Debugging ]=======================*/
-
 /**
  * A.1 Delete All SVC Data
  * If something goes wrong and we have too many entries in the database
@@ -586,8 +565,7 @@ function deleteAllSVCData() {
     console.log("Failed to remove SVC Data. Error: " + error.message);
   });
   return;
-}
-
+} // END deleteAllSVCData
 
 /**
  * searchGiphy
@@ -606,7 +584,8 @@ function searchGiphy(queryParamsObj) {
 
   // Call our ajax function
   ajaxGET(queryURL, updatePage, alertErrorMessage);
-}
+  return;
+} // END searchGiphy
 
 var testparamsObj = {
   "q": "blink 182",
