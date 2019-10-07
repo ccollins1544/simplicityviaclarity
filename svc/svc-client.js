@@ -67,7 +67,7 @@ var _connectionsRef = _fdb.ref("/svc/connections");
 // '.info/connected' is a boolean value, true if the client is connected and false if they are not.
 var _connectedRef = _fdb.ref(".info/connected");
 
-/*******************************************[ DISABLED ]********************************************* */
+/*******************************************[ DISABLED - START ]****************************************************** */
 /**
  * 1.3 saveToFirebase
  * @param {object} dataObj - represents svcData object
@@ -207,6 +207,7 @@ function _checkfirebaseforip(dataObj) {
 
   return;
 } // END _checkfirebaseforip
+/*******************************************[ DISABLED - END ]****************************************************** */
 
 /** ===============[ 2. Helper Functions ]================
  * 2.1 loadXMLDoc
@@ -259,7 +260,7 @@ function consoleResults(data) {
  * @param {string} format - long or short
  * @return {string} formatedDate
  */
-formatDate = function (unformatedDate, format = "long", time = true) {
+var formatDate = function (unformatedDate, format = "long", time = true) {
   const monthNamesLong = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -287,7 +288,7 @@ formatDate = function (unformatedDate, format = "long", time = true) {
   }
 
   return formatedDate;
-};
+}; // END formatDate
 
 /**
  * 2.4 getHeaders
@@ -329,7 +330,7 @@ function getHeaders() {
   }
   // document.getElementById("dump").innerHTML = display;
   return display;
-}
+} // END getHeaders
 
 /**
  * 2.5 getSiteURL
@@ -349,14 +350,13 @@ function getSiteURL(url_piece = "full") {
     default:
       return fullURL;
   }
-}
+} // END getSiteURL
 
 /**===============[ 3. svcData Functions ]===============
  * These functions will build the following object and 
  * save it to localStorage,
  * 
  * svcData = {
- *   ????????????????key: <unique-key>
  *   dateAdded: <timestamp>
  *   ip: ipGeoLocation
  *   site_url : window.location.href,
@@ -369,10 +369,10 @@ function getSiteURL(url_piece = "full") {
  *   ],
  * };
  * 
- * ????????????????svcData.key - the firebase key obtained when pushed to firebase.
  * svcData.dateAdded - represents the date when object was pushed to firebase.
  * svcData.ip - represents geo location data retrieved from ip address.
  * svcData.site_url - main site url like http://127.0.0.1:5500
+ * svcData.activePage - the active page being viewed. 
  * svcData.pages - array of pages accessed. 
  ********************************************************
  /**
@@ -506,7 +506,7 @@ ipGeoLocation();
 //-------------------------------------[ 4.3 Firebase Connection Watcher ]---------------------------
 _connectedRef.on("value", function (snap) {
 
-/*
+/* ********************************[ DISABLED - START ]**********************************************
   var currentPage = getSiteURL("page");
   var pageIndex = 1;
   
@@ -522,10 +522,10 @@ _connectedRef.on("value", function (snap) {
       } // END for(var i=0; i < svcData.pages.length; i++ ){
     } // END if(typeof(svcData.pages) == 'object' && svcData.pages instanceof Array){
   } // if(svcData.hasOwnProperty('pages')){
-*/
 
   //var pageRef = _fdb.ref("/svc/" + svcData.key + "/pages/" + pageIndex + "/active");
   // var pageRef = _fdb.ref("/svc/" + svcData.key + "/activePage/");
+/* ********************************[ DISABLED - END ]**********************************************/
 
   // If they are connected..
   if (snap.val()) {
