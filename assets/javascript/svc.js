@@ -1,9 +1,9 @@
 /*********************************************************
  * Simplicity Via Clarity
  * @package simplicityviaclarity
- * @subpackage app
- * @author Christopher C, Blake, Sultan
- * @version 2.0.0
+ * @subpackage svc server
+ * @author Christopher C, Blake S, Sultan K
+ * @version 2.1.0
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
@@ -18,25 +18,28 @@
  *     1.3.5 updateCurrentUser
  *     1.3.6 SignOut
  * 
- *   1.4 Active Viewers Counter
+ *   1.4 Active Viewers Watcher
  * 
  * 2. Functions
- *   1.1 ajaxGET
- *   1.2 alertMessage
- *   1.3 alertErrorMessage
- *   1.4 alertSuccessMessage
- *   1.5 updatePage
- *   1.6 deparam
+ *   2.1 ajaxGET
+ *   2.2 alertMessage
+ *   2.3 alertErrorMessage
+ *   2.4 alertSuccessMessage
+ *   2.5 updatePage
+ *   2.6 deparam
+ *   2.7 startClock
+ *   2.8 updateActiveVisitorsTable
  * 
  * 3. Document Ready
  *   3.1 Render Last Search
  *   3.2 Set Up Clickable elements
  * 
  * A. Debugging
+ *   A.1 Delete All SVC Data
  *********************************************************/
 /* ===============[ 0. GLOBALS ]=========================*/
 var lastQuery;
-var visitorsTableFields = ["count" , "active-page", "page-duration", "site-duration", "ip", "geo-location"];
+var visitorsTableFields = ["site_url", "activePage", "page-duration", "ip-address", "geo-location"];
 
 /* ===============[ 1. Firebase ]=========================*/
 /**
@@ -54,7 +57,7 @@ var firebaseConfig = {
 };
 
 // 1.2 Initialize Firebase
-if( !firebase.apps.length ){
+if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
@@ -181,37 +184,50 @@ var updateCurrentUser = function () {
   if (firebase.auth().currentUser !== null) {
     // User is signed in.
     CurrentUser = firebase.auth().currentUser;
-    
-    if($(window).width() > 768 ){
+
+    if ($(window).width() > 768) {
       $("#main-nav").slideDown();
-    }else{
+    } else {
       $("#mobile-nav").slideDown();
     }
 
     $("#sign-out").show();
     $("#admin-login").hide();
+    $("#active-visitors").show();
+    $("#title-section").removeClass("jumbotron");
     var displayText = $("<h5>").html(CurrentUser.displayName);
     var displayImage = $("<img>").addClass("rounded").attr("src", CurrentUser.photoURL);
     displayImage = $("<div>").addClass("text-center d-flex justify-center align-self-start image_wrap").html(displayImage);
-    $("#user-display-name").append(displayText, displayImage);
+
+    if ($(window).width() > 768) {
+      $("#main-avatar").append(displayText, displayImage);
+    } else {
+      $("#mobile-avatar").append(displayText, displayImage);
+    }
 
   } else {
     // No user is signed in.
     CurrentUser = null; // Force this to be null
-  
-    if($(window).width() > 768 ){
+
+    if ($(window).width() > 768) {
       $("#main-nav").slideUp();
-    }else{
+    } else {
       $("#mobile-nav").slideUp();
     }
 
     $("#sign-out").hide();
     $("#admin-login").show();
-    $("#user-display-name").empty();
+    $("#active-visitors").hide();
+    $("#title-section").addClass("jumbotron");
+
+    if ($(window).width() > 768) {
+      $("#main-avatar").empty();
+    } else {
+      $("#mobile-avatar").empty();
+    }
   }
 
   console.log("Current User:", CurrentUser);
-
   // updateTrainSchedule();
   return;
 }; // END CurrentUser
@@ -234,13 +250,70 @@ var SignOut = function () {
   });
 }; // END SignOut
 
-// 1.4 Active Viewers Counter
+//-------------------------------------[ 1.4 Active Viewers Watcher ]---------------------------
 connectionsRef.on("value", function (snapshot) {
-
   // Display the viewer count in the html.
   // The number of online users is the number of children in the connections list.
   $("#watchers").text(snapshot.numChildren());
+
+  var tableData = {};
+  var uniqueKey = false;
+  for(var i in snapshot.val()){
+    if (snapshot.val().hasOwnProperty(i)) {
+      // console.log(i + " : " + snapshot.val()[i]);
+      for(var property in snapshot.val()[i]){
+        uniqueKey = i;
+
+        if (visitorsTableFields.includes(property)) {
+          tableData[property] = snapshot.val()[i][property];
+        
+        }else if(property === "ip" && snapshot.val()[i][property].hasOwnProperty('address')){
+          tableData["ip-address"] = snapshot.val()[i][property]['address'];
+          
+          if(snapshot.val()[i][property].hasOwnProperty('city')){
+            tableData["geo-location"] = snapshot.val()[i][property]['city'];
+
+            if(snapshot.val()[i][property].hasOwnProperty('latitude') && snapshot.val()[i][property].hasOwnProperty('longitude')){
+              tableData["latitude"] = snapshot.val()[i][property]['latitude'];
+              tableData["longitude"] = snapshot.val()[i][property]['longitude'];
+            }
+
+          }else{
+            tableData["geo-location"] = "unknown";
+          }
+
+        }else if(property === "dateAdded"){
+          tableData["page-duration"] = moment(snapshot.val()[i][property]).fromNow(true);
+          tableData["date_added"] = snapshot.val()[i][property];
+
+        }else if(property === "pages" && snapshot.val()[i][property].length > 0){
+          var all_pages = "";
+          for (var p in snapshot.val()[i][property]){
+            all_pages += snapshot.val()[i][property][p]['page'] + ", ";
+          }
+          
+          all_pages = all_pages.replace(/,\s*$/, "");
+          tableData["pages"] = all_pages;
+        }
+      }
+    }
+  } // END for(var property in snapshot.val()){
+
+  tableData['key'] = uniqueKey;
+  AddToVisitorsTable(tableData);
+
+}, function (errorObject) {
+  console.log("The read failed: " + errorObject.code);
 });
+
+// Detect Connection Removed
+connectionsRef.on('child_removed', function(oldChildSnapshot){
+  var keyRemoved = oldChildSnapshot.key;
+  console.log("Child " + keyRemoved + " was removed");
+  $("#" + keyRemoved).remove();
+});
+
+//-------------------------------------[ Active Viewers Watcher ]---------------------------
 
 /* ===============[ 2. Functions ]=======================*/
 /**
@@ -377,24 +450,145 @@ deparam = function (querystring) {
   return params;
 }; // END deparam
 
+/**
+ * 2.7 startClock
+ * Displays current time and continues counting the seconds. 
+ * @param {string} divSelector - defaults to #clock
+ */
+var startClock = function (divSelector) {
+  divSelector = (divSelector === undefined) ? "#clock" : divSelector;
+  setInterval(function () {
+      $(divSelector).html(moment().format('MMMM D, YYYY H:mm:ss A'));
+    },
+    1000);
+}; // END startClock
+
+/**
+ * 2.8 AddToVisitorsTable
+ * Adds a row to #active-visitors-table table body. 
+ * @param {object} tableRowObj - properties in this object must be inside the global visitorsTableFields
+ */
+function AddToVisitorsTable(tableRowObj) {
+  if (CurrentUser === undefined && CurrentUser === null) {
+    return;
+  }
+
+  var newRow = $("<tr>");
+
+  for (var i in visitorsTableFields) {
+    var KEY = visitorsTableFields[i];
+
+    if (tableRowObj.hasOwnProperty(KEY)) {
+      var VALUE = tableRowObj[KEY];
+
+      if(KEY === "page-duration" && tableRowObj.hasOwnProperty('date_added')){
+        newRow.append(
+          $("<td>").attr("data-date-added", tableRowObj['date_added']).text(VALUE)
+        );
+
+      }else{
+
+        newRow.append(
+          $("<td>").text(VALUE)
+        );
+      }
+
+    }else{
+      newRow.append(
+        $("<td>").text(" ")
+      );
+    }
+  } // loop through visitorsTableFields
+
+  if (tableRowObj.hasOwnProperty('key')) {
+    newRow.attr("id", tableRowObj['key']);
+
+    if( $("#" + tableRowObj['key']).length === 0){
+      $("#active-visitors-table > tbody").append(newRow);
+    }
+  }
+  
+  console.log("called AddtoVisitorTable");
+  console.log(tableRowObj);
+} // END AddToVisitorsTable
+
+/**
+ * 2.9 RemoveFromVisitorsTable
+ * Removes a row from #active-visitors-table table body. 
+ * @param {object} tableRowObj - properties in this object must be inside the global visitorsTableFields
+ */
+function RemoveFromVisitorsTable(uniqueKey){
+  if (CurrentUser === undefined && CurrentUser === null) {
+    return;
+  }
+
+  var childRef = dbRef.child(uniqueKey);
+
+  childRef.remove().then(function () {
+    console.log("Remove succeeded.");
+
+  }).catch(function (error) {
+    console.log("Remove failed: " + error.message);
+  });
+
+  var trID = "#" + uniqueKey;
+  $(trID).remove();
+} // END RemoveFromVisitorsTable
+
+function updateVistorsTableDuration(){
+  $("#active-visitors-table > tbody tr").each(function (i, el) {
+    var page_duration = $(el).find("td:nth-child(3)").data("date-added");  
+
+    // page_duration = moment().diff(moment(page_duration), "minutes");
+    page_duration = moment(page_duration).fromNow(true);
+    $(el).find("td:nth-child(3)").text(page_duration);
+    // console.log("page_duration:", page_duration);
+  });
+}
+
 /* ===============[ 3. Document Ready ]==================*/
 $(function () {
   // 3.1 Check if User Logged In and update CurrentUser global
   // $("#sign-in").show();
   $("#sign-out").hide();
-  $("#user-display-name").empty();
   setTimeout(updateCurrentUser, 1000);
-  
+
   /**
-   * 3.2 Render Last Search
+   * Start Clock
    */
+  startClock();
+  setInterval(updateVistorsTableDuration, 10 * 1000);
 
   /**
    * 3.3 Set Up Clickable elements
    */
+
+
+  // setTimeout(deleteAllSVCData, 10 * 1000);
 });
 
 /* ===============[ A. Debugging ]=======================*/
+
+/**
+ * A.1 Delete All SVC Data
+ * If something goes wrong and we have too many entries in the database
+ * we need a way to delete them to improve performance.
+ **/
+function deleteAllSVCData() {
+  if (CurrentUser === undefined || CurrentUser === null) {
+    // Restrict access to logged in users only. 
+    return;
+  }
+
+  dbRef.remove().then(function () {
+    console.log("Removed All SVC Data from firebase");
+  }).catch(function (error) {
+    console.log("Failed to remove SVC Data. Error: " + error.message);
+  });
+  return;
+}
+
+
 /**
  * searchGiphy
  * @param {*} queryParamsObj 

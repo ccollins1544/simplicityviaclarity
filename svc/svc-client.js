@@ -1,17 +1,18 @@
 /*********************************************************
  * Simplicity Via Clarity
  * @package simplicityviaclarity
- * @subpackage app listener
- * @author Christopher C, Blake, Sultan
- * @version 2.0.0
+ * @subpackage svc client
+ * @author Christopher C, Blake S, Sultan K
+ * @version 2.1.0
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
  * 1. Firebase
  *   1.1 Firebase Configuration
  *   1.2 Initialize Firebase
- *   1.3 saveToFirebase
- *   1.4 _pushChild
+ *   1.3 saveToFirebase -- DISABLED
+ *   1.4 _pushChild -- DISABLED
+ *   1.5 checkfirebaseforip -- DISABLED
  * 
  * 2. Helper Functions
  *   2.1 loadXMLDoc
@@ -66,6 +67,7 @@ var _connectionsRef = _fdb.ref("/svc/connections");
 // '.info/connected' is a boolean value, true if the client is connected and false if they are not.
 var _connectedRef = _fdb.ref(".info/connected");
 
+/*******************************************[ DISABLED ]********************************************* */
 /**
  * 1.3 saveToFirebase
  * @param {object} dataObj - represents svcData object
@@ -76,14 +78,16 @@ var _connectedRef = _fdb.ref(".info/connected");
  * the passed argument. 
  */
 function saveToFirebase(dataObj) {
+  return;
   dataObj.dateAdded = firebase.database.ServerValue.TIMESTAMP;
-
+  
   _fdb.ref().once('value', function (sn) {
     if (sn.hasChild('/svc')) {
       _checkfirebaseforip(dataObj);
 
     } else {
       _pushChild(dataObj);
+      console.log("pushed all into:", dataObj.key)
     }
   }, function (errorObject) {
     console.log("The read failed: " + errorObject.code);
@@ -101,11 +105,13 @@ function saveToFirebase(dataObj) {
  * when it didn't really need to. 
  */
 function _pushChild(dataObj) {
+  return;
+
   _dbRef.push(dataObj).then((snap) => {
     dataObj.key = snap.key;
 
     // Save svcData to LocalStorage
-    console.log("Saved To Firebase");
+    console.log("Saved To Firebase", dataObj.key);
     localStorage.setItem("svc_data", JSON.stringify(svcData));
 
   }, function (errorObject) {
@@ -119,6 +125,12 @@ function _pushChild(dataObj) {
  * @param {object} dataObj - represents svcData object
  */
 function _checkfirebaseforip(dataObj) {
+  return; 
+
+  var foundIP = false;
+  var foundSite = false;
+  var foundPage = false;
+  
   if (dataObj.hasOwnProperty('key')) {
     _dbRef.once('value', function (snapshot) {
 
@@ -127,10 +139,11 @@ function _checkfirebaseforip(dataObj) {
 
           for (var property in snap.val()) {
             if (snap.val().hasOwnProperty(property) && svcData.hasOwnProperty('ip') && svcData.hasOwnProperty('site_url') && svcData.hasOwnProperty('pages')) {
-
+              
               if (property === "ip" && snap.val()[property].hasOwnProperty("address") && svcData.ip.hasOwnProperty('address')) {
 
                 if (snap.val()[property]['address'] === svcData.ip.address) {
+                  foundIP=true;
                   console.log('Already saved this ip in firebase', svcData.ip.address);
                   // return;
 
@@ -138,11 +151,13 @@ function _checkfirebaseforip(dataObj) {
                   // child doesn't exists so push it. 
                   dataObj.key = snap.key;
                   _pushChild(dataObj);
+                  console.log("pushed ip into:", dataObj.key);
                 } // END else-if (snap.val()[property]['address'] === svcData.ip.address) {
 
               } else if (property === "site_url") {
 
                 if (snap.val()[property] === svcData.site_url) {
+                  foundSite=true;
                   console.log('Already saved this site_url in firebase', svcData.ip.address);
                   // return;
 
@@ -150,17 +165,20 @@ function _checkfirebaseforip(dataObj) {
                   // child doesn't exists so push it. 
                   dataObj.key = snap.key;
                   _pushChild(dataObj);
+                  console.log("pushed site_url into:", dataObj.key);
                 } // END else-if (snap.val()[property]['address'] === svcData.ip.address) {
 
               } else if (property === "pages") {
                 for (var i = 0; i < snap.val()[property].length; i++) {
                   if (snap.val()[property][i].hasOwnProperty('page')) {
                     if (snap.val()[property][i]['page'] === svcData.pages[i].page) {
+                      foundPage=true;
                       console.log('Already saved this page in firebase', svcData.pages[i].page);
                       // return;
                     } else {
                       dataObj.key = snap.key;
                       _pushChild(dataObj);
+                      console.log("pushed page into:", dataObj.key);
                     }
                   }
                 }
@@ -179,9 +197,14 @@ function _checkfirebaseforip(dataObj) {
       console.log("The read failed: " + errorObject.code);
     }); // END _dbRef.once('value', function(snapshot){
       
-  }else{
-    _pushChild(dataObj)
   } // END if (dataObj.hasOwnProperty('key')) {
+
+  // IF any of these don't exist push the child svcData into firebase
+  if( !foundIP || !foundSite || !foundPage ){
+    _pushChild(dataObj);
+    console.log("Missing so pushed all", dataObj.key);
+  }
+
   return;
 } // END _checkfirebaseforip
 
@@ -333,10 +356,11 @@ function getSiteURL(url_piece = "full") {
  * save it to localStorage,
  * 
  * svcData = {
- *   key: <unique-key>
+ *   ????????????????key: <unique-key>
  *   dateAdded: <timestamp>
  *   ip: ipGeoLocation
  *   site_url : window.location.href,
+ *   activePage : /index.html,
  *   pages : [
  *     '0': {
  *       page: /index.html,
@@ -345,7 +369,7 @@ function getSiteURL(url_piece = "full") {
  *   ],
  * };
  * 
- * svcData.key - the firebase key obtained when pushed to firebase.
+ * ????????????????svcData.key - the firebase key obtained when pushed to firebase.
  * svcData.dateAdded - represents the date when object was pushed to firebase.
  * svcData.ip - represents geo location data retrieved from ip address.
  * svcData.site_url - main site url like http://127.0.0.1:5500
@@ -389,11 +413,13 @@ function build_svcData() {
   if (pageFound === false) {
     var d = new Date();
     var timestamp = d.getTime();
+    var activePage = getSiteURL("page");
     var pageObj = {
-      "page": getSiteURL("page"),
+      "page": activePage,
       "date_added": timestamp,
     };
 
+    svcData.activePage = activePage;
     svcData.pages = [];
     svcData.pages.push(pageObj);
   }; // if(pageFound === false){
@@ -430,7 +456,7 @@ function ipGeoLocation(ip) {
     // Check if locally stored IP is the same as current ip
     if (svcData.ip.hasOwnProperty('address')) {
       if (svcData.ip.address === ip) {
-        saveToFirebase(svcData);
+        // saveToFirebase(svcData);
         console.log('Already saved this ip to localStorage', ip);
         return;
       }
@@ -449,7 +475,7 @@ function ipGeoLocation(ip) {
 
       // Save svcData to LocalStorage
       localStorage.setItem("svc_data", JSON.stringify(svcData));
-      saveToFirebase(svcData);
+      // saveToFirebase(svcData);
       console.log("ipGeoLocation", svcData);
     }
   });
@@ -480,6 +506,7 @@ ipGeoLocation();
 //-------------------------------------[ 4.3 Firebase Connection Watcher ]---------------------------
 _connectedRef.on("value", function (snap) {
 
+/*
   var currentPage = getSiteURL("page");
   var pageIndex = 1;
   
@@ -495,20 +522,23 @@ _connectedRef.on("value", function (snap) {
       } // END for(var i=0; i < svcData.pages.length; i++ ){
     } // END if(typeof(svcData.pages) == 'object' && svcData.pages instanceof Array){
   } // if(svcData.hasOwnProperty('pages')){
+*/
 
   //var pageRef = _fdb.ref("/svc/" + svcData.key + "/pages/" + pageIndex + "/active");
-  var pageRef = _fdb.ref("/svc/" + svcData.key + "/activePage/");
+  // var pageRef = _fdb.ref("/svc/" + svcData.key + "/activePage/");
 
   // If they are connected..
   if (snap.val()) {
+    svcData.dateAdded = firebase.database.ServerValue.TIMESTAMP;
 
     // Add user to the connections list.
-    var con = _connectionsRef.push(true);
-    var activePage = pageRef.push({"index": pageIndex, "page": currentPage});
+    // var con = _connectionsRef.push(true);
+    var con = _connectionsRef.push(svcData);
+    // var activePage = pageRef.push({"index": pageIndex, "page": currentPage});
 
     // Remove user from the connection list when they disconnect.
     con.onDisconnect().remove();
-    activePage.onDisconnect().remove();
+    // activePage.onDisconnect().remove();
   }
 });
 //-------------------------------------[ Firebase Connection Watcher ]---------------------------
