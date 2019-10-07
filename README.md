@@ -8,7 +8,7 @@ As a user I would like to know who is visiting my website and see what pages the
 <!-- Simplicity Via Clarity Listener JS -->
 <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-database.js"></script>
-<script src="https://chris.ccollins.io/assets/svc/app-listener.js" type="text/javascript"></script>
+<script src="https://simplicityviaclarity.com/svc/svc-client.js" type="text/javascript"></script>
 ```
 2. Log into the [Admin Portal](https://simplicityviaclarity.com/) to view real-time updates. 
 
@@ -16,6 +16,6 @@ As a user I would like to know who is visiting my website and see what pages the
 * Site Link: [https://simplicityviaclarity.com/](https://simplicityviaclarity.com/)
 
 ## Authors
-* Christopher Collins
-* Blake
-* Sultan
+* [Christopher Collins](https://github.com/ccollins1544)
+* [Blake Sykes](https://github.com/psych0sykes)
+* [Sultan Kisana](https://github.com/sultankisana)
