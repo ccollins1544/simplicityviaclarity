@@ -3,7 +3,7 @@
  * @package simplicityviaclarity
  * @subpackage svc server
  * @author Christopher C, Blake S, Sultan K
- * @version 2.1.0
+ * @version 2.1.1
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
@@ -21,24 +21,28 @@
  *     1.4.1 Watch for new connections
  *     1.4.2 Detect Connection Removed
  * 
- * 2. Functions
+ * 2. Helper Functions
  *   2.1 ajaxGET
- *   2.2 alertMessage
- *   2.3 alertErrorMessage
- *   2.4 alertSuccessMessage
- *   2.5 updatePage
- *   2.6 deparam
- *   2.7 startClock
- *   2.8 updateActiveVisitorsTable
- *   2.9 RemoveFromVisitorsTable
- *   2.10 updateVistorsTableDuration
+ *   2.2 ajaxPOST
+ *   2.3 alertMessage
+ *   2.4 alertErrorMessage
+ *   2.5 alertSuccessMessage
+ *   2.6 startClock
+ *   2.7 updateActiveVisitorsTable
+ *   2.8 RemoveFromVisitorsTable
+ *   2.9 updateVistorsTableDuration
  * 
- * 3. Document Ready
- *   3.1 Check if User Logged In and update CurrentUser global
- *   3.2 Start Clock and Update Page
+ * 3. Slack API
  * 
- * A. Debugging
+ * 4. Document Ready
+ *   4.1 Check if User Logged In and update CurrentUser global
+ *   4.2 Start Clock and Update Page
+ * 
+ * A. Debugging / Archived
  *   A.1 Delete All SVC Data
+ *   A.2 searchGiphy
+ *   A.3 updatePage
+ *   A.4 deparam
  *********************************************************/
 /* ===============[ 0. GLOBALS ]=========================*/
 var lastQuery;
@@ -293,7 +297,7 @@ connectionsRef.on('child_removed', function (oldChildSnapshot) {
   var keyRemoved = oldChildSnapshot.key;
   $("#" + keyRemoved).remove();
 });
-//-------------------------------------[ Active Viewers Watcher - END ]---------------------------
+//-------------------------------------[ Active Viewers Watcher - END ]----------------------------------
 
 /* ===============[ 2. Functions ]=======================*/
 /**
@@ -310,9 +314,9 @@ var ajaxGET = function (ajaxURL, cb, cbErr) {
     //   cb(json);
     // },
     error: function (response, textStatus, errorThrown) {
-      console.log("response: ", response);
-      console.log("textStatus: ", textStatus);
-      console.log("errorThrown: ", errorThrown);
+      console.log("Response:", response);
+      console.log("TextStatus:", textStatus);
+      console.log("ErrorThrown:", errorThrown);
 
       var errorMessage = "<strong>Text Status</strong> " + textStatus + "<br />";
       errorMessage += "<strong>Error Thrown</strong> " + errorThrown + ".<br />";
@@ -325,7 +329,40 @@ var ajaxGET = function (ajaxURL, cb, cbErr) {
 }; // END ajaxGET
 
 /**
- * 2.2 alertMessage
+ * 2.2 ajaxPOST
+ * @param {string} ajaxURL 
+ * @param {object} dataObj - data to be sent via type: 'POST'
+ * @param {function} cb - callback function on success.
+ * @param {function} cbError - callback function on error.
+ */
+var ajaxPOST = function(ajaxURL, dataObj, cb, cbError){
+  // If callback error function is not defined than set it to an empty function.
+  if(!cbError){
+    cbError = function(){};
+  }
+
+  $.ajax({
+    type: 'POST',
+    url: ajaxURL,
+    dataType: 'text',
+    data: dataObj,
+    success: function(data){
+      console.log("result: " + data);
+      cb(data);
+    },
+    error: function(xhr, status, error){
+      console.log(arguments);
+      console.log("Response:", xhr);
+      console.log("TextStatus:", status);
+      console.log("ErrorThrough:", error);
+      cbError();
+    }
+  });
+  return;
+}; // END ajaxPOST
+
+/**
+ * 2.3 alertMessage
  * @param {string} message 
  * @param {string} addThisClass 
  */
@@ -364,7 +401,7 @@ function alertMessage(message = "", addThisClass = "info") {
 } // END alertMessage
 
 /**
- * 2.3 alertErrorMessage
+ * 2.4 alertErrorMessage
  */
 function alertErrorMessage() {
   if (arguments.length === 1) {
@@ -377,7 +414,7 @@ function alertErrorMessage() {
 } // END alertErrorMessage
 
 /**
- * 2.4 alertSuccessMessage
+ * 2.5 alertSuccessMessage
  */
 function alertSuccessMessage() {
   if (arguments.length === 1) {
@@ -390,47 +427,7 @@ function alertSuccessMessage() {
 } // END alertSuccessMessage
 
 /**
- * 2.5 updatePage
- * @param {JSON} response 
- */
-function updatePage(response) {
-  var resultsDiv = $("#results");
-
-  var queryParams = deparam(lastQuery);
-  alertSuccessMessage("<strong>updatePage called!</strong>");
-  console.log(response);
-  console.log(lastQuery);
-  console.log(queryParams);
-
-  if (lastQuery.split("/").indexOf("maps.googleapis.com") !== -1) {
-    // var DIV = $("div>").html()
-    // resultsDiv.prepend(DIV);
-  }
-
-  return;
-} // END updatePage
-
-/**
- * 2.6 deparam
- * returns the reverse of $.param
- */
-deparam = function (querystring) {
-  // remove any preceding url and split
-  querystring = querystring.substring(querystring.indexOf('?') + 1).split('&');
-  var params = {},
-    pair, d = decodeURIComponent,
-    i;
-  // march and parse
-  for (i = querystring.length; i > 0;) {
-    pair = querystring[--i].split('=');
-    params[d(pair[0])] = d(pair[1]);
-  }
-
-  return params;
-}; // END deparam
-
-/**
- * 2.7 startClock
+ * 2.6 startClock
  * Displays current time and continues counting the seconds. 
  * @param {string} divSelector - defaults to #clock
  */
@@ -443,7 +440,7 @@ var startClock = function (divSelector) {
 }; // END startClock
 
 /**
- * 2.8 AddToVisitorsTable
+ * 2.7 AddToVisitorsTable
  * Adds a row to #active-visitors-table table body. 
  * @param {object} tableRowObj - properties in this object must be inside the global visitorsTableFields
  */
@@ -491,7 +488,7 @@ function AddToVisitorsTable(tableRowObj) {
 } // END AddToVisitorsTable
 
 /**
- * 2.9 RemoveFromVisitorsTable
+ * 2.8 RemoveFromVisitorsTable
  * Removes a row from #active-visitors-table table body. 
  * @param {object} tableRowObj - properties in this object must be inside the global visitorsTableFields
  */
@@ -516,7 +513,7 @@ function RemoveFromVisitorsTable(uniqueKey) {
 } // END RemoveFromVisitorsTable
 
 /**
- * 2.10 updateVistorsTableDuration
+ * 2.9 updateVistorsTableDuration
  * Updates the page duration column based on date-added.
  */
 function updateVistorsTableDuration() {
@@ -532,26 +529,66 @@ function updateVistorsTableDuration() {
   return;
 } // END updateVistorsTableDuration
 
-/* ===============[ 3. Document Ready ]==================*/
+/* ===============[ 3. Slack API ]=======================*/
+// var ajaxPOST = function(ajaxURL, dataObj, cb, cbError){
+
+/**
+ * 3.1 sendSlackMessage
+ * @param {string} message - The message to be posted.
+ * @param {string} channel - The slack channel to post the message in. 
+ * @param {string} as_user - From User. If the provided user doesn't exist than the message will be sent from oauthToken owner. 
+ */
+function sendSlackMessage(message, as_user="simplicityviaclarity", channel="simplicityviaclarity") {
+  var ajaxURL = "https://slack.com/api/chat.postMessage";
+  var oauthToken_user = "xoxp-685838559649-715501489959-774346859890-00d61a81cc77046ca724abf6c0b45f06";
+  var oauthToken_bot = "xoxb-685838559649-789027187543-4NppAjFkus9INeWWROSI4Duf";
+  
+  if(message === undefined) {
+    return;
+  }
+
+  var data_object= {
+    "token": oauthToken_bot,
+    "channel": channel,
+    "text": message,
+    "as_user": as_user
+  };
+
+  var _success = function(x){
+    console.log("Results:", x);
+  };
+
+  var _fail = function(y){
+    console.log("Error:", y);
+  };
+
+  console.log(data_object);
+  return; 
+  ajaxPOST( ajaxURL, data_object, _success, _fail );
+} // END sendSlackMessage
+
+/* ===============[ 4. Document Ready ]==================*/
 $(function () {
-  // 3.1 Check if User Logged In and update CurrentUser global
+  // 4.1 Check if User Logged In and update CurrentUser global
   $("#sign-out").hide();
   setTimeout(updateCurrentUser, 1000);
 
   /**
-   * 3.2 Start Clock and Update Page
+   * 4.2 Start Clock and Update Page
    */
   startClock();
   setInterval(updateVistorsTableDuration, 30 * 1000);
 
-  // setTimeout(deleteAllSVCData, 10 * 1000);
+  // sendSlackMessage("Trying to send from bot user...attempt 5");
 }); // END document ready
 
-/* ===============[ A. Debugging ]=======================*/
+/* ===============[ A. Debugging / Archived ]=======================*/
 /**
  * A.1 Delete All SVC Data
  * If something goes wrong and we have too many entries in the database
  * we need a way to delete them to improve performance.
+ * Usage: 
+ * setTimeout(deleteAllSVCData, 10 * 1000);
  **/
 function deleteAllSVCData() {
   if (CurrentUser === undefined || CurrentUser === null) {
@@ -568,7 +605,7 @@ function deleteAllSVCData() {
 } // END deleteAllSVCData
 
 /**
- * searchGiphy
+ * A.2 searchGiphy
  * @param {*} queryParamsObj 
  */
 function searchGiphy(queryParamsObj) {
@@ -592,3 +629,43 @@ var testparamsObj = {
 };
 
 // searchGiphy(testparamsObj);
+
+/**
+ * A.3 updatePage
+ * @param {JSON} response 
+ */
+function updatePage(response) {
+  var resultsDiv = $("#results");
+
+  var queryParams = deparam(lastQuery);
+  alertSuccessMessage("<strong>updatePage called!</strong>");
+  console.log(response);
+  console.log(lastQuery);
+  console.log(queryParams);
+
+  if (lastQuery.split("/").indexOf("maps.googleapis.com") !== -1) {
+    // var DIV = $("div>").html()
+    // resultsDiv.prepend(DIV);
+  }
+
+  return;
+} // END updatePage
+
+/**
+ * A.4 deparam
+ * returns the reverse of $.param
+ */
+deparam = function (querystring) {
+  // remove any preceding url and split
+  querystring = querystring.substring(querystring.indexOf('?') + 1).split('&');
+  var params = {},
+    pair, d = decodeURIComponent,
+    i;
+  // march and parse
+  for (i = querystring.length; i > 0;) {
+    pair = querystring[--i].split('=');
+    params[d(pair[0])] = d(pair[1]);
+  }
+
+  return params;
+}; // END deparam
