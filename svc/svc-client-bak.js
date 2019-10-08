@@ -3,13 +3,16 @@
  * @package simplicityviaclarity
  * @subpackage svc client
  * @author Christopher C, Blake S, Sultan K
- * @version 2.1.1
+ * @version 2.1.0
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
  * 1. Firebase
  *   1.1 Firebase Configuration
  *   1.2 Initialize Firebase
+ *   1.3 saveToFirebase -- DISABLED
+ *   1.4 _pushChild -- DISABLED
+ *   1.5 checkfirebaseforip -- DISABLED
  * 
  * 2. Helper Functions
  *   2.1 loadXMLDoc
@@ -63,6 +66,148 @@ var _connectionsRef = _fdb.ref("/svc/connections");
 // the client's connection state changes.
 // '.info/connected' is a boolean value, true if the client is connected and false if they are not.
 var _connectedRef = _fdb.ref(".info/connected");
+
+/*******************************************[ DISABLED - START ]****************************************************** */
+/**
+ * 1.3 saveToFirebase
+ * @param {object} dataObj - represents svcData object
+ * 
+ * NOTE: passing an object or array as an argument to a method will
+ * change the object since it's passed by reference. 
+ * Where as other variable types will pass by value and not change 
+ * the passed argument. 
+ */
+function saveToFirebase(dataObj) {
+  return;
+  dataObj.dateAdded = firebase.database.ServerValue.TIMESTAMP;
+  
+  _fdb.ref().once('value', function (sn) {
+    if (sn.hasChild('/svc')) {
+      _checkfirebaseforip(dataObj);
+
+    } else {
+      _pushChild(dataObj);
+      console.log("pushed all into:", dataObj.key)
+    }
+  }, function (errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  }); // END _fdb.once('value', function(sn){
+
+  return;
+} // END saveToFirebase
+
+/**
+ * 1.4 _pushChild
+ * @param {object} dataObj 
+ * 
+ * NOTE: This function must be separate from saveToFirebase due to the fact that 
+ * it has a promise which takes time and would simultaneously try to _pushChild
+ * when it didn't really need to. 
+ */
+function _pushChild(dataObj) {
+  return;
+
+  _dbRef.push(dataObj).then((snap) => {
+    dataObj.key = snap.key;
+
+    // Save svcData to LocalStorage
+    console.log("Saved To Firebase", dataObj.key);
+    localStorage.setItem("svc_data", JSON.stringify(svcData));
+
+  }, function (errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  }); // END _dbRef.push(dataObj).then( (snap) => {
+} // END _pushChild
+
+/**
+ * 1.5 checkfirebaseforip
+ * Check if ip exists in firebase and return out of the function if it does.
+ * @param {object} dataObj - represents svcData object
+ */
+function _checkfirebaseforip(dataObj) {
+  return; 
+
+  var foundIP = false;
+  var foundSite = false;
+  var foundPage = false;
+  
+  if (dataObj.hasOwnProperty('key')) {
+    _dbRef.once('value', function (snapshot) {
+
+      if (snapshot.numChildren() > 0) {
+        snapshot.forEach(function (snap) {
+
+          for (var property in snap.val()) {
+            if (snap.val().hasOwnProperty(property) && svcData.hasOwnProperty('ip') && svcData.hasOwnProperty('site_url') && svcData.hasOwnProperty('pages')) {
+              
+              if (property === "ip" && snap.val()[property].hasOwnProperty("address") && svcData.ip.hasOwnProperty('address')) {
+
+                if (snap.val()[property]['address'] === svcData.ip.address) {
+                  foundIP=true;
+                  console.log('Already saved this ip in firebase', svcData.ip.address);
+                  // return;
+
+                } else {
+                  // child doesn't exists so push it. 
+                  dataObj.key = snap.key;
+                  _pushChild(dataObj);
+                  console.log("pushed ip into:", dataObj.key);
+                } // END else-if (snap.val()[property]['address'] === svcData.ip.address) {
+
+              } else if (property === "site_url") {
+
+                if (snap.val()[property] === svcData.site_url) {
+                  foundSite=true;
+                  console.log('Already saved this site_url in firebase', svcData.ip.address);
+                  // return;
+
+                } else {
+                  // child doesn't exists so push it. 
+                  dataObj.key = snap.key;
+                  _pushChild(dataObj);
+                  console.log("pushed site_url into:", dataObj.key);
+                } // END else-if (snap.val()[property]['address'] === svcData.ip.address) {
+
+              } else if (property === "pages") {
+                for (var i = 0; i < snap.val()[property].length; i++) {
+                  if (snap.val()[property][i].hasOwnProperty('page')) {
+                    if (snap.val()[property][i]['page'] === svcData.pages[i].page) {
+                      foundPage=true;
+                      console.log('Already saved this page in firebase', svcData.pages[i].page);
+                      // return;
+                    } else {
+                      dataObj.key = snap.key;
+                      _pushChild(dataObj);
+                      console.log("pushed page into:", dataObj.key);
+                    }
+                  }
+                }
+              } // END if property === ip, site_url, pages
+
+            } else {
+              console.log("------------------------------------------------------------------------------");
+              console.log("Something doesn't look right.");
+            } // END if (snap.val().hasOwnProperty(property) && svcData.hasOwnProperty('ip')) {
+          } // END for (var property in snap.val()) {
+
+        }); // END snapshot.forEach(function(snap)
+      } // END if (snapshot.numChildren() > 0) {
+
+    }, function (errorObject) {
+      console.log("The read failed: " + errorObject.code);
+    }); // END _dbRef.once('value', function(snapshot){
+      
+  } // END if (dataObj.hasOwnProperty('key')) {
+
+  // IF any of these don't exist push the child svcData into firebase
+  if( !foundIP || !foundSite || !foundPage ){
+    _pushChild(dataObj);
+    console.log("Missing so pushed all", dataObj.key);
+  }
+
+  return;
+} // END _checkfirebaseforip
+/*******************************************[ DISABLED - END ]****************************************************** */
 
 /** ===============[ 2. Helper Functions ]================
  * 2.1 loadXMLDoc
@@ -234,6 +379,7 @@ function getSiteURL(url_piece = "full") {
   * 3.1 build_svcData
   */
 function build_svcData() {
+
   // Set site_url
   var siteFound = false;
   if (svcData.hasOwnProperty('site_url')) {
@@ -310,6 +456,7 @@ function ipGeoLocation(ip) {
     // Check if locally stored IP is the same as current ip
     if (svcData.ip.hasOwnProperty('address')) {
       if (svcData.ip.address === ip) {
+        // saveToFirebase(svcData);
         console.log('Already saved this ip to localStorage', ip);
         return;
       }
@@ -328,6 +475,7 @@ function ipGeoLocation(ip) {
 
       // Save svcData to LocalStorage
       localStorage.setItem("svc_data", JSON.stringify(svcData));
+      // saveToFirebase(svcData);
       console.log("ipGeoLocation", svcData);
     }
   });
@@ -342,11 +490,11 @@ function ipGeoLocation(ip) {
 
   xhr.send(data);
   return;
-} // END ipGeoLocation
+} // ipGeoLocation
 
 /** ===============[ 4. Collect Site Data ]===============
  * Will run the svcData functions to collect site data and
- * push changes to firebase when client is connected.
+ * push changes to firebase.
  ********************************************************/
 // 4.1 Set svcData.ip
 build_svcData();
@@ -357,15 +505,40 @@ ipGeoLocation();
 
 //-------------------------------------[ 4.3 Firebase Connection Watcher ]---------------------------
 _connectedRef.on("value", function (snap) {
+
+/* ********************************[ DISABLED - START ]**********************************************
+  var currentPage = getSiteURL("page");
+  var pageIndex = 1;
+  
+  if (svcData.hasOwnProperty('pages')) {
+    if (typeof (svcData.pages) == 'object' && svcData.pages instanceof Array) {
+
+      for (var i = 0; i < svcData.pages.length; i++) {
+        if (svcData.pages[i].hasOwnProperty('page')) {
+          if (svcData.pages[i].page === currentPage) {
+            pageIndex = i;
+          }
+        } // if(svcData.pages[i].hasOwnProperty('page')){
+      } // END for(var i=0; i < svcData.pages.length; i++ ){
+    } // END if(typeof(svcData.pages) == 'object' && svcData.pages instanceof Array){
+  } // if(svcData.hasOwnProperty('pages')){
+
+  //var pageRef = _fdb.ref("/svc/" + svcData.key + "/pages/" + pageIndex + "/active");
+  // var pageRef = _fdb.ref("/svc/" + svcData.key + "/activePage/");
+/* ********************************[ DISABLED - END ]**********************************************/
+
   // If they are connected..
   if (snap.val()) {
     svcData.dateAdded = firebase.database.ServerValue.TIMESTAMP;
 
     // Add user to the connections list.
+    // var con = _connectionsRef.push(true);
     var con = _connectionsRef.push(svcData);
+    // var activePage = pageRef.push({"index": pageIndex, "page": currentPage});
 
     // Remove user from the connection list when they disconnect.
     con.onDisconnect().remove();
+    // activePage.onDisconnect().remove();
   }
 });
 //-------------------------------------[ Firebase Connection Watcher ]---------------------------
