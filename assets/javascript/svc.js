@@ -33,6 +33,7 @@
  *   2.9 updateVistorsTableDuration
  * 
  * 3. Slack API
+ *   3.1 sendSlackMessage <---[ Disabled for now ]---
  * 
  * 4. Document Ready
  *   4.1 Check if User Logged In and update CurrentUser global
@@ -46,6 +47,7 @@
  *********************************************************/
 /* ===============[ 0. GLOBALS ]=========================*/
 var lastQuery;
+var lastAlarm=0;
 var visitorsTableFields = ["site_url", "activePage", "page-duration", "ip-address", "geo-location"];
 
 /* ===============[ 1. Firebase ]=========================*/
@@ -287,6 +289,34 @@ connectionsRef.on("value", function (snapshot) {
 
   tableData['key'] = uniqueKey;
   AddToVisitorsTable(tableData);
+
+  // Send Slack Message when alarms are hit
+  var alarm1 = 10;
+  var alarm2 = 15;
+  var alarm3 = 25;
+
+  // Going Up...
+  if( snapshot.numChildren() >= alarm1 && lastAlarm < alarm1 ){
+    sendSlackMessage("You have currently have " + snapshot.numChildren() + " visitors viewing your sites.");
+    console.log("Alarm 1 Hit: " + alarm1 + " < " + snapshot.numChildren());
+    lastAlarm = snapshot.numChildren();
+    
+  } else if( snapshot.numChildren() >= alarm2 && lastAlarm < alarm2 ){
+    sendSlackMessage("You have currently have " + snapshot.numChildren() + " visitors viewing your sites.");
+    console.log("Alarm 2 Hit: " + alarm2 + " < " + snapshot.numChildren());
+    lastAlarm = snapshot.numChildren();
+    
+  } else if( snapshot.numChildren() >= alarm3 && lastAlarm < alarm3 ){
+    sendSlackMessage("You have currently have " + snapshot.numChildren() + " visitors viewing your sites.");
+    console.log("Alarm 3 Hit: " + alarm3 + " < " + snapshot.numChildren());
+    lastAlarm = snapshot.numChildren();
+  }
+
+  // RESET ALARMS when numChildren < alarm1...and after we already hit alarm3
+  if( snapshot.numChildren() < alarm1 && lastAlarm === alarm3 ) {
+    lastAlarm=0;
+    console.log("Alarm Reset");
+  }
 
 }, function (errorObject) {
   console.log("The read failed: " + errorObject.code);
@@ -530,8 +560,6 @@ function updateVistorsTableDuration() {
 } // END updateVistorsTableDuration
 
 /* ===============[ 3. Slack API ]=======================*/
-// var ajaxPOST = function(ajaxURL, dataObj, cb, cbError){
-
 /**
  * 3.1 sendSlackMessage
  * @param {string} message - The message to be posted.
@@ -548,7 +576,7 @@ function sendSlackMessage(message, as_user="simplicityviaclarity", channel="simp
   }
 
   var data_object= {
-    "token": oauthToken_bot,
+    "token": oauthToken_user,
     "channel": channel,
     "text": message,
     "as_user": as_user
@@ -563,7 +591,7 @@ function sendSlackMessage(message, as_user="simplicityviaclarity", channel="simp
   };
 
   console.log(data_object);
-  return; 
+  return; // <-------------------[ DISABLED FOR NOW ]------------------------
   ajaxPOST( ajaxURL, data_object, _success, _fail );
 } // END sendSlackMessage
 
@@ -578,8 +606,6 @@ $(function () {
    */
   startClock();
   setInterval(updateVistorsTableDuration, 30 * 1000);
-
-  // sendSlackMessage("Trying to send from bot user...attempt 5");
 }); // END document ready
 
 /* ===============[ A. Debugging / Archived ]=======================*/
