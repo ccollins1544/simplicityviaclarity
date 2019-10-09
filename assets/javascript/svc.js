@@ -52,6 +52,11 @@ var visitorsTableFields = ["site_url", "activePage", "page-duration", "ip-addres
 var pieArray = [];
 var barArray = [];
 
+
+/*===============[ 0.1 Initialize Google Charts]=====================*/
+
+google.charts.load('current', {'packages':['corechart']});
+
 /* ===============[ 1. Firebase ]=========================*/
 /**
  * 1.1 Firebase Configuration
@@ -251,8 +256,12 @@ connectionsRef.on("value", function (snapshot) {
   // The number of online users is the number of children in the connections list.
   $("#watchers").text(snapshot.numChildren());
   
-  barArray = [];
-  pieArray = [];
+  barArray = [
+    ["Page","Users"]
+  ];
+  pieArray = [
+    ["Region","Users"]
+  ];
   var tableData = {};
   var uniqueKey = false;
   for (var i in snapshot.val()) {
@@ -298,10 +307,17 @@ connectionsRef.on("value", function (snapshot) {
     
     if(snapshot.val()[i].hasOwnProperty("activePage")) {
       var visitorPage = snapshot.val()[i]["activePage"];
-      barArray.push(visitorPage);
+      // If array includes page string, add to the counter. Else, push new string to the array.
+        if(barArray.includes(visitorPage)) {
+          var pageIndex = barArray.indexOf(visitorPage);
+          barArray[pageIndex][1] = (barArray[pageIndex][1] + 1)
+        }
+        else {
+        barArray.push([visitorPage , 1]);
+        }
       }
       else {
-      var visitorPage = "None";
+      var visitorPage = ["None" , 1];
       barArray.push(visitorPage);
       }
 
@@ -309,15 +325,35 @@ connectionsRef.on("value", function (snapshot) {
     if(snapshot.val()[i].hasOwnProperty("ip")) {
 
     if(snapshot.val()[i]["ip"].hasOwnProperty("region")) {
-    var visitorRegion = snapshot.val()[i]["ip"]["region"];
+    var visitorRegion = [snapshot.val()[i]["ip"]["region"] , 1];
     pieArray.push(visitorRegion);
     }
     else {
-    var visitorRegion = "None";
+    var visitorRegion = ["None" , 1];
     pieArray.push(visitorRegion);
     }
 
     }
+
+    // Update and Append Charts ======================================================================|
+    
+    function pieChart(a,b) {
+  
+      var data = new google.visualization.arrayToDataTable(pieArray,false);
+      var chartOptions = {
+          title: a,
+          width: 500,
+          height: 300,
+  
+      };
+      
+      var chart = new google.visualization.PieChart(document.getElementById(b));
+  
+      chart.draw(data, chartOptions);
+  }
+
+  pieChart("Users by Region","chart1");
+
 
   } // END for(var property in snapshot.val()){
 

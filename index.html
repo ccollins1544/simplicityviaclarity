@@ -85,6 +85,17 @@
           <p id="loader">Loading...</p>
         </div>
       </div>
+      <!-- Dynamic Charts & Scorecards -->
+      <div class="row" id="charts">
+        <div class="col-md-6">
+          <div class="row" id="chart1"></div>
+          <div class="row" id="scorecard1"></div>
+        </div>
+        <div class="col-md-6">
+          <div class="row" id="chart2"></div>
+          <div class="row" id="scorecard2"></div>
+        </div>
+      </div>
 
       <!-- Active Visitors Table -->
       <div class="col-lg-12" id="active-visitors">
@@ -127,6 +138,9 @@
     crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"
     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+  <!-- Google Charts -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
   <!-- Firebase References -->
   <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-app.js"></script>
