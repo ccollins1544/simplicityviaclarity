@@ -1151,3 +1151,14 @@ img {
     margin-right: 15px;
   }
 }
+
+.flexMe {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+}
+
+.flexMeBoys {
+  margin: 10px;
+}

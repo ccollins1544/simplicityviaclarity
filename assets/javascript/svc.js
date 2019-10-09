@@ -312,18 +312,19 @@ connectionsRef.on("value", function (snapshot) {
       // If array includes page string, add to the counter. Else, push new string to the array.
       arrayCheck = 0;
       for(b = 0; b < barArray.length; b++) {
-        console.log(visitorPage)
+        // console.log(visitorPage)
           if(barArray[b].includes(visitorPage)) {
             var pageIndex = barArray.indexOf(visitorPage);
             barArray[b][1] = (barArray[b][1] + 1);
-            return(console.log("Pages" + barArray));
+            // console.log("Pages" + barArray);
+            return;
           }
           else {
             arrayCheck++;
-            console.log("nonono")
+            // console.log("nonono")
             if(arrayCheck === barArray.length) {
             barArray.push([visitorPage , 0]);
-            (console.log("Adding Page: " + visitorPage));
+            // (console.log("Adding Page: " + visitorPage));
             }
           }
       }
@@ -346,13 +347,14 @@ connectionsRef.on("value", function (snapshot) {
         if(pieArray[b].includes(visitorRegion)) {
           var pageIndex = pieArray.indexOf(visitorRegion);
           pieArray[b][1] = (pieArray[b][1] + 1);
-          return(console.log("Regions" + pieArray));
+          // (console.log("Regions" + pieArray));
+          return;
         }
         else {
           arrayCheck++;
           if(arrayCheck > 0 && arrayCheck === pieArray.length) {
           pieArray.push([visitorRegion , 0]);
-          (console.log("Adding Region: " + visitorRegion));
+          // (console.log("Adding Region: " + visitorRegion));
           }
         }
     }
@@ -372,7 +374,7 @@ connectionsRef.on("value", function (snapshot) {
       var data = new google.visualization.arrayToDataTable(pieArray,false);
       var chartOptions = {
           title: a,
-          width: 300,
+          width: 400,
           height: 300,
   
       };
@@ -387,7 +389,7 @@ connectionsRef.on("value", function (snapshot) {
       var data = new google.visualization.arrayToDataTable(barArray,false);
       var chartOptions = {
           title: a,
-          width: 300,
+          width: 400,
           height: 300,
 
       };
