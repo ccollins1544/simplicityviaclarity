@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <meta name="description" content="Project 1 ">
-  <title>Project 1</title>
+  <link href="assets/images/icons8-rock-and-roll-hand-32.png" rel="shortcut icon">
+  <meta name="description"
+    content="As a user I would like to know who is visiting my website and see what pages they are on as well as user activity.">
+  <title>Simplicity via Clarity</title>
 
   <!-- Font Awesome -->
   <script src="https://kit.fontawesome.com/fece22d596.js"></script>
@@ -13,40 +15,107 @@
   <!-- CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <!-- <link href="assets/css/style.css" rel="stylesheet"> -->
+  <link href="assets/css/style.css?v=2.1.1" rel="stylesheet">
+
 </head>
 
 <body>
-  <!-- Main Container -->
-  <article class="content-wrapper" id="main-container">
-    <section class="section-block jumbotron" id="main-section">
-      <h1>Ride Witch</h1>
-    </section>
-    <div class="col-md-3" id="left-col"></div>
-    <div class="col-md-6">
-      <section class="container" id="content">
-        <div class="row" id="user-inputs">
-          <form>
-            <div class="row">
-              <div class="col-md-6">
-                <input type="text" name="starting-point" id="starting-point">
-              </div>
-              <div class="col-md-6">
-                <input type="text" name="end-point" id="end-point">
-              </div>
-            </div>
-            <div class="row">
-              <input type="submit" name="submit" id="submit">
-            </div>
-          </form>
-        </div>
-      </section>
-    </div>
-    <div class="col-md-3" id="right-col"></div>
-    </article>
-  
+  <!-- Header -->
+  <header id="main-header">
+    <div class="container-fluid clearfix">
+      <!-- Main Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="main-nav">
+        <!-- Navbar brand -->
+        <a class="navbar-brand mb-0 h1" href="/" id="main-avatar"></a>
 
-  <!-- Bootstrap JS -->
+        <div class="collapse navbar-collapse show">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" id="sign-out" onclick="SignOut();">Logout</a>
+            </li>
+          </ul>
+        </div><!-- .navbar-collapse -->
+      </nav><!-- #main-nav -->
+
+      <!-- Mobile Navbar -->
+      <div class="pos-f-t navbar-dark" id="mobile-nav">
+        <!-- Navbar brand -->
+        <a class="navbar-brand mb-0 h1" href="/" id="mobile-avatar"></a>
+
+        <nav class="navbar navbar-dark bg-dark">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleMenu"
+            aria-controls="navbarToggleMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </nav>
+
+        <div class="collapse navbar-collapse" id="navbarToggleMenu">
+          <div class="bg-dark p-3">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" id="sign-out" onclick="SignOut();">Sign Out</a>
+              </li>
+            </ul>
+          </div><!-- .bg-dark -->
+        </div><!-- #navbarToggleMenu -->
+      </div><!-- #mobile-nav -->
+
+    </div><!-- .container-fluid -->
+  </header><!-- #main-header -->
+
+  <!-- Main Container -->
+  <article class="content-wrapper container" id="main-container">
+
+    <section class="section-block jumbotron" id="title-section">
+      <h1 class="text-center">
+        <i class="far fa-chart-bar"></i><strong> Simplicity via Clarity</strong>
+      </h1>
+      <h3 class="text-center" id="watchers"></h3>
+
+    </section><!-- #title-section -->
+
+    <section class="row" id="main-section">
+      <!-- Admin Login -->
+      <div class="card border-primary mb-3 col-lg-12" id="admin-login">
+        <div class="card-header text-center">
+          <h5 class="card-title">Admin Login</h5>
+        </div>
+        <div class="card-body text-primary">
+          <div id="firebaseui-auth-container"></div>
+          <p id="loader">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Active Visitors Table -->
+      <div class="col-lg-12" id="active-visitors">
+        <div class="card bg-dark">
+          <div class="card-header text-white d-flex justify-content-between">
+            <div><i class="fas fa-user"></i><strong> Active Visitors</strong></div>
+            <div class="clock" id="clock">loading ...</div>
+          </div>
+        </div>
+
+        <div class="card-body bg-light border-primary">
+          <table class="table table-striped" id="active-visitors-table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Site</th>
+                <th scope="col">Active Page</th>
+                <th scope="col">Page Duration</th>
+                <th scope="col">IP</th>
+                <th scope="col">GeoLocation</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div><!-- .card-body -->
+      </div>
+
+    </section><!-- #main-section -->
+
+  </article><!-- main-container -->
+
+  <!-- jQuery, Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
@@ -56,10 +125,23 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
     crossorigin="anonymous"></script>
-
-  <!-- JS -->
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"
     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+  <!-- Firebase References -->
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-firestore.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
+  <!-- Simplicity Via Clarity Client JS -->
+  <script src="svc/svc-client.js?v=2.1.1" type="text/javascript"></script>
+
+  <!-- Moment, SVC Server JS -->
+  <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+  <script src="assets/javascript/svc.js?v=2.1.1" type="text/javascript"></script>
 </body>
 
 </html>
