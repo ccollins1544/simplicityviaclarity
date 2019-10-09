@@ -49,6 +49,8 @@
 var lastQuery;
 var lastAlarm=0;
 var visitorsTableFields = ["site_url", "activePage", "page-duration", "ip-address", "geo-location"];
+var pieArray = [];
+var barArray = [];
 
 /* ===============[ 1. Firebase ]=========================*/
 /**
@@ -245,9 +247,12 @@ as well as run your chart update function.
 // 1.4.1 Watch for new connections
 connectionsRef.on("value", function (snapshot) {
   // Display the viewer count in the html.
+
   // The number of online users is the number of children in the connections list.
   $("#watchers").text(snapshot.numChildren());
-
+  
+  barArray = [];
+  pieArray = [];
   var tableData = {};
   var uniqueKey = false;
   for (var i in snapshot.val()) {
@@ -289,7 +294,36 @@ connectionsRef.on("value", function (snapshot) {
         }
       }
     }
+    // Get ActivePage from each visitor and push to barArray ==========================================|
+    
+    if(snapshot.val()[i].hasOwnProperty("activePage")) {
+      var visitorPage = snapshot.val()[i]["activePage"];
+      barArray.push(visitorPage);
+      }
+      else {
+      var visitorPage = "None";
+      barArray.push(visitorPage);
+      }
+
+    // Get Region from each visitor and push to pieArray =============================================|
+    if(snapshot.val()[i].hasOwnProperty("ip")) {
+
+    if(snapshot.val()[i]["ip"].hasOwnProperty("region")) {
+    var visitorRegion = snapshot.val()[i]["ip"]["region"];
+    pieArray.push(visitorRegion);
+    }
+    else {
+    var visitorRegion = "None";
+    pieArray.push(visitorRegion);
+    }
+
+    }
+
   } // END for(var property in snapshot.val()){
+
+  console.log("this pie " + pieArray);
+  console.log("this bar " + barArray);
+
 
   tableData['key'] = uniqueKey;
   AddToVisitorsTable(tableData);
