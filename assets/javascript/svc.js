@@ -308,13 +308,16 @@ connectionsRef.on("value", function (snapshot) {
     if(snapshot.val()[i].hasOwnProperty("activePage")) {
       var visitorPage = snapshot.val()[i]["activePage"];
       // If array includes page string, add to the counter. Else, push new string to the array.
-        if(barArray.includes(visitorPage)) {
-          var pageIndex = barArray.indexOf(visitorPage);
-          barArray[pageIndex[1]] = (barArray[pageIndex[1]] + 1)
+        for(a = 0; a < barArray.length; a++) {
+          if(barArray[a].includes(visitorPage)) {
+            var pageIndex = barArray.indexOf(visitorPage);
+            barArray[a][1] = (barArray[a][1] + 1)
+            console.log("Pages" + barArray)
         }
         else {
         barArray.push([visitorPage , 1]);
         }
+    }
       }
       else {
       visitorPage = ["None" , 1];
@@ -332,7 +335,7 @@ connectionsRef.on("value", function (snapshot) {
         if(pieArray[b].includes(visitorRegion)) {
           var pageIndex = pieArray.indexOf(visitorRegion);
           pieArray[b][1] = (pieArray[b][1] + 1)
-          console.log(pieArray)
+          console.log("Regions" + pieArray)
         }
         else {
         pieArray.push([visitorRegion , 1]);
@@ -349,6 +352,7 @@ connectionsRef.on("value", function (snapshot) {
 
     // Update and Append Charts ======================================================================|
     
+  // Draw Pie Chart Function ======================================================|
     function pieChart(a,b) {
   
       var data = new google.visualization.arrayToDataTable(pieArray,false);
@@ -363,9 +367,24 @@ connectionsRef.on("value", function (snapshot) {
   
       chart.draw(data, chartOptions);
   }
+  // Draw Bar Chart Function ======================================================|
+    function barChart(a,b) {
+    
+      var data = new google.visualization.arrayToDataTable(barArray,false);
+      var chartOptions = {
+          title: a,
+          width: 500,
+          height: 300,
+
+      };
+      
+      var chart = new google.visualization.BarChart(document.getElementById(b));
+
+      chart.draw(data, chartOptions);
+  }
 
   pieChart("Users by Region","chart1");
-
+  barChart("Viewed Pages","chart2")
 
   } // END for(var property in snapshot.val()){
 
