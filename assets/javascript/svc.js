@@ -304,18 +304,20 @@ connectionsRef.on("value", function (snapshot) {
       }
     }
     // Get ActivePage from each visitor and push to barArray ==========================================|
-    
+
+    function activePageArray() {
     if(snapshot.val()[i].hasOwnProperty("activePage")) {
       var visitorPage = snapshot.val()[i]["activePage"];
       // If array includes page string, add to the counter. Else, push new string to the array.
         for(a = 0; a < barArray.length; a++) {
           if(barArray[a].includes(visitorPage)) {
             var pageIndex = barArray.indexOf(visitorPage);
-            barArray[a][1] = (barArray[a][1] + 1)
-            console.log("Pages" + barArray)
+            barArray[a][1] = (barArray[a][1] + 1);
+            return(console.log("Pages" + barArray));
         }
         else {
-        barArray.push([visitorPage , 1]);
+          barArray.push([visitorPage , 1]);
+          (console.log("No"));
         }
     }
       }
@@ -323,34 +325,41 @@ connectionsRef.on("value", function (snapshot) {
       visitorPage = ["None" , 1];
       barArray.push(visitorPage);
       }
+    };
 
     // Get Region from each visitor and push to pieArray =============================================|
+    
+    function visitorRegionArray() {
     if(snapshot.val()[i].hasOwnProperty("ip")) {
-
     if(snapshot.val()[i]["ip"].hasOwnProperty("region")) {
     var visitorRegion = snapshot.val()[i]["ip"]["region"];
     // If array includes page string, add to the counter. Else, push new string to the array.
 
     for(b = 0; b < pieArray.length; b++) {
+      console.log("loop")
+      var arrayCheck = 0;
         if(pieArray[b].includes(visitorRegion)) {
           var pageIndex = pieArray.indexOf(visitorRegion);
-          pieArray[b][1] = (pieArray[b][1] + 1)
-          console.log("Regions" + pieArray)
+          pieArray[b][1] = (pieArray[b][1] + 1);
+          return(console.log("Regions" + pieArray));
         }
         else {
-        pieArray.push([visitorRegion , 1]);
+          arrayCheck++;
+          if(arrayCheck > 0 && arrayCheck === pieArray.length) {
+          pieArray.push([visitorRegion , 0]);
+          (console.log("Adding Region"));
+          }
         }
     }
     }
-  
     else {
-    visitorRegion = ["None" , 1];
-    pieArray.push(visitorRegion);
+    pieArray.push(["N/A",1]);
     }
-
     }
-
-    // Update and Append Charts ======================================================================|
+    else {
+    pieArray.push(["N/A",1]);
+    }
+  }
     
   // Draw Pie Chart Function ======================================================|
     function pieChart(a,b) {
@@ -358,7 +367,7 @@ connectionsRef.on("value", function (snapshot) {
       var data = new google.visualization.arrayToDataTable(pieArray,false);
       var chartOptions = {
           title: a,
-          width: 500,
+          width: 300,
           height: 300,
   
       };
@@ -366,14 +375,14 @@ connectionsRef.on("value", function (snapshot) {
       var chart = new google.visualization.PieChart(document.getElementById(b));
   
       chart.draw(data, chartOptions);
-  }
+  };
   // Draw Bar Chart Function ======================================================|
     function barChart(a,b) {
     
       var data = new google.visualization.arrayToDataTable(barArray,false);
       var chartOptions = {
           title: a,
-          width: 500,
+          width: 300,
           height: 300,
 
       };
@@ -381,10 +390,14 @@ connectionsRef.on("value", function (snapshot) {
       var chart = new google.visualization.BarChart(document.getElementById(b));
 
       chart.draw(data, chartOptions);
-  }
+  };
 
-  pieChart("Users by Region","chart1");
-  barChart("Viewed Pages","chart2")
+  // Functions to Update and Append Charts ======================================================================|
+
+  // activePageArray();
+  visitorRegionArray();
+  pieChart("Visitors by Region","chart1");
+  barChart("Viewed Pages","chart2");
 
   } // END for(var property in snapshot.val()){
 
