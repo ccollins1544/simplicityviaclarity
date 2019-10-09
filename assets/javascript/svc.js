@@ -237,7 +237,11 @@ var SignOut = function () {
   return;
 }; // END SignOut
 
+//======================================================================================================/
+/* The following function will run on any new connection, take advantage by getting any data need for charts
+as well as run your chart update function.
 //-------------------------------------[ 1.4 Active Viewers Watcher - START ]---------------------------
+*/
 // 1.4.1 Watch for new connections
 connectionsRef.on("value", function (snapshot) {
   // Display the viewer count in the html.
@@ -317,6 +321,9 @@ connectionsRef.on("value", function (snapshot) {
     lastAlarm=0;
     console.log("Alarm Reset");
   }
+
+  // ==============================[ GET CHART DATA ^ UP THERE ]============================
+  // ==============================[ PUT CHART UPDATE FUNCTION HERE ]============================
 
 }, function (errorObject) {
   console.log("The read failed: " + errorObject.code);
@@ -556,6 +563,7 @@ function updateVistorsTableDuration() {
     // console.log("page_duration:", page_duration);
   });
 
+  // updatecharts
   return;
 } // END updateVistorsTableDuration
 
