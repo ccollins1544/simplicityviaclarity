@@ -15,7 +15,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link href="assets/css/style.css?v=2.0.0" rel="stylesheet">
+  <link href="assets/css/style.css?v=2.1.1" rel="stylesheet">
 
 </head>
 
@@ -25,14 +25,11 @@
     <div class="container-fluid clearfix">
       <!-- Main Navbar -->
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="main-nav">
-        <a class="navbar-brand mb-0 h1" href="/" id="user-display-name"></a>
+        <!-- Navbar brand -->
+        <a class="navbar-brand mb-0 h1" href="/" id="main-avatar"></a>
 
         <div class="collapse navbar-collapse show">
           <ul class="navbar-nav ml-auto">
-            <!-- Links -->
-            <!-- <li class="nav-item">
-              <span class="nav-link" id="user-display-name"></span>
-            </li> -->
             <li class="nav-item active">
               <a class="nav-link" id="sign-out" onclick="SignOut();">Logout</a>
             </li>
@@ -43,7 +40,7 @@
       <!-- Mobile Navbar -->
       <div class="pos-f-t navbar-dark" id="mobile-nav">
         <!-- Navbar brand -->
-        <!-- <a class="navbar-brand mb-0 h1" href="#"></a> -->
+        <a class="navbar-brand mb-0 h1" href="/" id="mobile-avatar"></a>
 
         <nav class="navbar navbar-dark bg-dark">
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleMenu"
@@ -55,9 +52,6 @@
         <div class="collapse navbar-collapse" id="navbarToggleMenu">
           <div class="bg-dark p-3">
             <ul class="navbar-nav mr-auto">
-              <li class="nav-item">
-                <span class="nav-link" id="user-display-name"></span>
-              </li>
               <li class="nav-item active">
                 <a class="nav-link" id="sign-out" onclick="SignOut();">Sign Out</a>
               </li>
@@ -81,6 +75,7 @@
     </section><!-- #title-section -->
 
     <section class="row" id="main-section">
+      <!-- Admin Login -->
       <div class="card border-primary mb-3 col-lg-12" id="admin-login">
         <div class="card-header text-center">
           <h5 class="card-title">Admin Login</h5>
@@ -90,6 +85,32 @@
           <p id="loader">Loading...</p>
         </div>
       </div>
+
+      <!-- Active Visitors Table -->
+      <div class="col-lg-12" id="active-visitors">
+        <div class="card bg-dark">
+          <div class="card-header text-white d-flex justify-content-between">
+            <div><i class="fas fa-user"></i><strong> Active Visitors</strong></div>
+            <div class="clock" id="clock">loading ...</div>
+          </div>
+        </div>
+
+        <div class="card-body bg-light border-primary">
+          <table class="table table-striped" id="active-visitors-table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Site</th>
+                <th scope="col">Active Page</th>
+                <th scope="col">Page Duration</th>
+                <th scope="col">IP</th>
+                <th scope="col">GeoLocation</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div><!-- .card-body -->
+      </div>
+
     </section><!-- #main-section -->
 
   </article><!-- main-container -->
@@ -110,18 +131,17 @@
   <!-- Firebase References -->
   <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-database.js"></script>
-  <!-- <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-analytics.js"></script> -->
   <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.0.0/firebase-firestore.js"></script>
   <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
 
-  <!-- Simplicity Via Clarity Listener JS -->
-  <script src="assets/javascript/app-listener.js?v=2.0.0" type="text/javascript"></script>
+  <!-- Simplicity Via Clarity Client JS -->
+  <script src="svc/svc-client.js?v=2.1.1" type="text/javascript"></script>
 
-  <!-- Moment, APP JS -->
+  <!-- Moment, SVC Server JS -->
   <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
-  <script src="assets/javascript/app.js?v=2.0.0" type="text/javascript"></script>
+  <script src="assets/javascript/svc.js?v=2.1.1" type="text/javascript"></script>
 </body>
 
 </html>

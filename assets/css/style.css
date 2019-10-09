@@ -1,7 +1,7 @@
 /**
  * MAIN CSS
  * Author:  Christopher Collins
- * Version: 2.0.0
+ * Version: 2.1.1
  * License: none (public domain)
  */
 /*------------------------------------------------------
@@ -22,6 +22,7 @@
 3.0 MAIN LAYOUT INFO
   3.1 AVATAR
   3.2 Admin Login
+  3.3 Active Visitors (#active-visitors)
 
 4.0 FOOTER
   4.1 Footer Links and Credits
@@ -571,7 +572,8 @@ img {
 }
 
 .avatar_image .image_wrap img,
-#user-display-name .image_wrap img {
+#main-avatar .image_wrap img,
+#mobile-avatar .image_wrap img {
   max-width: 100%;
   height: auto;
   border-color: var(--primary-menu-background);
@@ -599,6 +601,22 @@ img {
 
 .text-primary {
   color: var(--body-text) !important;
+}
+
+/* 3.3 Active Visitors (#active-visitors)
+/*------------------------------------------------------*/
+#active-visitors {
+  margin-top: 20px;
+}
+
+#active-visitors-table {
+  table-layout: fixed;
+  margin-bottom: 0px;
+}
+
+.card-body.border-primary {
+  border: solid 1px;
+  padding: 0px;
 }
 
 /*------------------------------------------------------*/
