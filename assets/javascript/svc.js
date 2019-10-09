@@ -51,6 +51,7 @@ var lastAlarm=0;
 var visitorsTableFields = ["site_url", "activePage", "page-duration", "ip-address", "geo-location"];
 var pieArray = [];
 var barArray = [];
+var arrayCheck = 0;
 
 
 /*===============[ 0.1 Initialize Google Charts]=====================*/
@@ -309,22 +310,28 @@ connectionsRef.on("value", function (snapshot) {
     if(snapshot.val()[i].hasOwnProperty("activePage")) {
       var visitorPage = snapshot.val()[i]["activePage"];
       // If array includes page string, add to the counter. Else, push new string to the array.
-        for(a = 0; a < barArray.length; a++) {
-          if(barArray[a].includes(visitorPage)) {
+      arrayCheck = 0;
+      for(b = 0; b < barArray.length; b++) {
+        console.log(visitorPage)
+          if(barArray[b].includes(visitorPage)) {
             var pageIndex = barArray.indexOf(visitorPage);
-            barArray[a][1] = (barArray[a][1] + 1);
+            barArray[b][1] = (barArray[b][1] + 1);
             return(console.log("Pages" + barArray));
-        }
-        else {
-          barArray.push([visitorPage , 1]);
-          (console.log("No"));
-        }
-    }
+          }
+          else {
+            arrayCheck++;
+            console.log("nonono")
+            if(arrayCheck === barArray.length) {
+            barArray.push([visitorPage , 0]);
+            (console.log("Adding Page: " + visitorPage));
+            }
+          }
+      }
       }
       else {
-      visitorPage = ["None" , 1];
-      barArray.push(visitorPage);
+      barArray.push(["N/A",1]);
       }
+  
     };
 
     // Get Region from each visitor and push to pieArray =============================================|
@@ -334,10 +341,8 @@ connectionsRef.on("value", function (snapshot) {
     if(snapshot.val()[i]["ip"].hasOwnProperty("region")) {
     var visitorRegion = snapshot.val()[i]["ip"]["region"];
     // If array includes page string, add to the counter. Else, push new string to the array.
-
+    arrayCheck = 0;
     for(b = 0; b < pieArray.length; b++) {
-      console.log("loop")
-      var arrayCheck = 0;
         if(pieArray[b].includes(visitorRegion)) {
           var pageIndex = pieArray.indexOf(visitorRegion);
           pieArray[b][1] = (pieArray[b][1] + 1);
@@ -347,7 +352,7 @@ connectionsRef.on("value", function (snapshot) {
           arrayCheck++;
           if(arrayCheck > 0 && arrayCheck === pieArray.length) {
           pieArray.push([visitorRegion , 0]);
-          (console.log("Adding Region"));
+          (console.log("Adding Region: " + visitorRegion));
           }
         }
     }
@@ -394,7 +399,7 @@ connectionsRef.on("value", function (snapshot) {
 
   // Functions to Update and Append Charts ======================================================================|
 
-  // activePageArray();
+  activePageArray();
   visitorRegionArray();
   pieChart("Visitors by Region","chart1");
   barChart("Viewed Pages","chart2");
