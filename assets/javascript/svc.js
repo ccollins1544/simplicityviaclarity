@@ -310,14 +310,14 @@ connectionsRef.on("value", function (snapshot) {
       // If array includes page string, add to the counter. Else, push new string to the array.
         if(barArray.includes(visitorPage)) {
           var pageIndex = barArray.indexOf(visitorPage);
-          barArray[pageIndex][1] = (barArray[pageIndex][1] + 1)
+          barArray[pageIndex[1]] = (barArray[pageIndex[1]] + 1)
         }
         else {
         barArray.push([visitorPage , 1]);
         }
       }
       else {
-      var visitorPage = ["None" , 1];
+      visitorPage = ["None" , 1];
       barArray.push(visitorPage);
       }
 
@@ -325,11 +325,23 @@ connectionsRef.on("value", function (snapshot) {
     if(snapshot.val()[i].hasOwnProperty("ip")) {
 
     if(snapshot.val()[i]["ip"].hasOwnProperty("region")) {
-    var visitorRegion = [snapshot.val()[i]["ip"]["region"] , 1];
-    pieArray.push(visitorRegion);
+    var visitorRegion = snapshot.val()[i]["ip"]["region"];
+    // If array includes page string, add to the counter. Else, push new string to the array.
+
+    for(b = 0; b < pieArray.length; b++) {
+        if(pieArray[b].includes(visitorRegion)) {
+          var pageIndex = pieArray.indexOf(visitorRegion);
+          pieArray[b][1] = (pieArray[b][1] + 1)
+          console.log(pieArray)
+        }
+        else {
+        pieArray.push([visitorRegion , 1]);
+        }
     }
+    }
+  
     else {
-    var visitorRegion = ["None" , 1];
+    visitorRegion = ["None" , 1];
     pieArray.push(visitorRegion);
     }
 
