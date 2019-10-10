@@ -1,7 +1,7 @@
 /**
  * MAIN CSS
  * Author:  Christopher Collins
- * Version: 2.1.1
+ * Version: 2.2.0
  * License: none (public domain)
  */
 /*------------------------------------------------------
@@ -23,6 +23,7 @@
   3.1 AVATAR
   3.2 Admin Login
   3.3 Active Visitors (#active-visitors)
+  3.4 Google Charts
 
 4.0 FOOTER
   4.1 Footer Links and Credits
@@ -97,7 +98,8 @@ article#main-container {
  * header 63px + main-container margin 40px + section margin 50px + footer 83px = 236px
  */
 #main-container.content-wrapper {
-  min-height: 100vh;
+  max-width: 100%; 
+  /* min-height: 100vh; */
   /* calc(100vh - 220px); */
 }
 
@@ -105,9 +107,17 @@ article#main-container {
   border-radius: 5px;
   padding-bottom: 15px;
   padding: 30px 15px;
-  background-color: var(--body-background);
+  /* background-color: var(--body-background);
   border-color: var(--primary-menu-background);
+  box-shadow: 0px 12px 24px -6px var(--primary-menu-background); */
+}
+
+#main-section {
   box-shadow: 0px 12px 24px -6px var(--primary-menu-background);
+}
+
+#main-section.mobile-width {
+  max-width: 500px;
 }
 
 .container-fluid {
@@ -116,7 +126,7 @@ article#main-container {
 
 .row {
   margin: 0 auto;
-  padding: 15px 0px;
+  padding: 0; /* padding: 15px 0px; */
 }
 
 .first-row {
@@ -130,7 +140,9 @@ article#main-container {
 }
 
 section.section-block {
+  margin-bottom: 10%;
   background-color: var(--body-background);
+  box-shadow: 0px 12px 24px -6px var(--primary-menu-background);
 }
 
 li {
@@ -444,6 +456,10 @@ img {
   color: rgba(255, 255, 255, .5);
 }
 
+.navbar-collapse {
+  z-index: 99;
+}
+
 /* Active Nav Link */
 #main-nav .navbar-nav .active>.nav-link,
 #main-nav .navbar-nav .nav-link.active,
@@ -468,7 +484,7 @@ img {
 .navbar-brand {
   position: absolute;
   display: flex;
-  flex-flow: column wrap;
+  /* flex-flow: column wrap; */
   align-items: center;
   border-radius: 3px;
   top: 0;
@@ -476,15 +492,17 @@ img {
   padding: 0px;
   text-align: center;
   font-family: "Montserrat";
+  z-index: 99;
   /* background-color: rgba(0, 0, 0, 0.8); */
 }
 
 .navbar-brand h5 {
-  padding: 1rem 0px;
+  padding: 1rem 0 25px 0;
 }
 
 .navbar-brand div.d-flex {
-  max-width: 150px;
+  max-width: 120px;
+  margin-left: 0px;
 }
 
 .navbar-dark .navbar-brand:focus,
@@ -576,11 +594,26 @@ img {
 #mobile-avatar .image_wrap img {
   max-width: 100%;
   height: auto;
+  border: solid 2px var(--primary-menu-background);
   border-color: var(--primary-menu-background);
   background-color: var(--body-text);
   box-shadow: 0px 12px 18px -6px var(--primary-menu-background);
 }
 
+.rounded {
+  border-radius: 50% !important;
+}
+
+#main-avatar {
+  display: flex;
+  margin-left: -45px;
+}
+
+#main-avatar .image_wrap {
+  width: 45px;
+  margin-right: 15px;
+  margin-top: -15px;
+}
 /* 3.2 Admin Login (#admin-login)
 /*------------------------------------------------------*/
 #admin-login {
@@ -588,6 +621,7 @@ img {
 }
 
 .card-header {
+  font-size: 1.5em;
   background: var(--primary-menu-background);
 }
 
@@ -603,20 +637,52 @@ img {
   color: var(--body-text) !important;
 }
 
+#title-section.top-absolute {
+  position: absolute;
+  right: 0px;
+  left: 0px;
+  top: 0;
+  background-color: transparent;
+  max-width: 550px;
+}
+
 /* 3.3 Active Visitors (#active-visitors)
 /*------------------------------------------------------*/
 #active-visitors {
-  margin-top: 20px;
+  margin-top: 0px;
 }
 
 #active-visitors-table {
-  table-layout: fixed;
+  /* table-layout: fixed; */
   margin-bottom: 0px;
 }
 
 .card-body.border-primary {
   border: solid 1px;
   padding: 0px;
+}
+
+#watchers {
+  color: var(--accent-text);
+}
+
+/* 3.4 Google Charts
+/*------------------------------------------------------*/
+#all-charts,
+#active-visitors {
+  padding: 0px;
+}
+
+.flexMe {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+}
+
+.flexMeBoys {
+  margin: 5px;
+  border: solid 1px;
 }
 
 /*------------------------------------------------------*/
@@ -1150,15 +1216,4 @@ img {
     margin-left: 15px;
     margin-right: 15px;
   }
-}
-
-.flexMe {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: center;
-}
-
-.flexMeBoys {
-  margin: 10px;
 }

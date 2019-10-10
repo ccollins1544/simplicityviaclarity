@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link href="assets/images/icons8-rock-and-roll-hand-32.png" rel="shortcut icon">
+  <link href="assets/images/chart-icon.png" rel="shortcut icon">
   <meta name="description"
     content="As a user I would like to know who is visiting my website and see what pages they are on as well as user activity.">
   <title>Simplicity via Clarity</title>
@@ -70,13 +70,13 @@
       <h1 class="text-center">
         <i class="far fa-chart-bar"></i><strong> Simplicity via Clarity</strong>
       </h1>
-      <h3 class="text-center" id="watchers"></h3>
+      <!-- <h3 class="text-center" id="watchers"></h3> -->
 
     </section><!-- #title-section -->
 
-    <section class="row" id="main-section">
+    <section class="row mobile-width" id="main-section">
       <!-- Admin Login -->
-      <div class="card border-primary mb-3 col-lg-12" id="admin-login">
+      <div class="card border-primary col-lg-12" id="admin-login">
         <div class="card-header text-center">
           <h5 class="card-title">Admin Login</h5>
         </div>
@@ -84,24 +84,34 @@
           <div id="firebaseui-auth-container"></div>
           <p id="loader">Loading...</p>
         </div>
-      </div>
+      </div><!-- .card#admin-login -->
+
       <!-- Dynamic Charts & Scorecards -->
-      <div class="container flexMe" id="charts">
-        <div class="flexMeBoys">
-          <div class="row" id="chart1"></div>
-          <div class="row" id="scorecard1"></div>
-        </div>
-        <div class="flexMeBoys">
-          <div class="row" id="chart2"></div>
-          <div class="row" id="scorecard2"></div>
-        </div>
+      <div class="col-lg-12" id="all-charts">
+        <div class="card bg-dark" id="charts">
+          <div class="card-header">
+            <h2 class="text-center text-white"><strong> Charts</strong></h2>
+          </div>
+
+          <div class="card-body flexMe text-primary">
+            <div class="flexMeBoys">
+              <div class="row" id="chart1"></div>
+              <div class="row" id="scorecard1"></div>
+            </div>
+            <div class="flexMeBoys">
+              <div class="row" id="chart2"></div>
+              <div class="row" id="scorecard2"></div>
+            </div>
+          </div>
+
+        </div><!-- .card#charts-->
       </div>
 
       <!-- Active Visitors Table -->
       <div class="col-lg-12" id="active-visitors">
         <div class="card bg-dark">
           <div class="card-header text-white d-flex justify-content-between">
-            <div><i class="fas fa-user"></i><strong> Active Visitors</strong></div>
+            <div><i class="fas fa-user"></i><strong> Active Visitors: <span id="watchers"></span></strong></div>
             <div class="clock" id="clock">loading ...</div>
           </div>
         </div>
@@ -118,9 +128,9 @@
               </tr>
             </thead>
             <tbody></tbody>
-          </table>
+          </table><!-- #active-visitors-table -->
         </div><!-- .card-body -->
-      </div>
+      </div><!-- #active-visitors -->
 
     </section><!-- #main-section -->
 
@@ -151,7 +161,7 @@
   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
 
   <!-- Simplicity Via Clarity Client JS -->
-  <script src="svc/svc-client.js?v=2.1.1" type="text/javascript"></script>
+  <!-- <script src="svc/svc-client.js?v=2.1.1" type="text/javascript"></script> -->
 
   <!-- Moment, SVC Server JS -->
   <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
