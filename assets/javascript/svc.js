@@ -3,7 +3,7 @@
  * @package simplicityviaclarity
  * @subpackage svc server
  * @author Christopher C, Blake S, Sultan K
- * @version 2.1.1
+ * @version 2.2.0
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
@@ -30,10 +30,10 @@
  *   2.6 startClock
  *   2.7 updateActiveVisitorsTable
  *   2.8 RemoveFromVisitorsTable
- *   2.9 updateVistorsTableDuration
+ *   2.9 updateVisitorsTableDuration
  * 
  * 3. Slack API
- *   3.1 sendSlackMessage <---[ Disabled for now ]---
+ *   3.1 sendSlackMessage
  * 
  * 4. Document Ready
  *   4.1 Check if User Logged In and update CurrentUser global
@@ -49,6 +49,14 @@
 var lastQuery;
 var lastAlarm=0;
 var visitorsTableFields = ["site_url", "activePage", "page-duration", "ip-address", "geo-location"];
+var pieArray = [];
+var barArray = [];
+var arrayCheck = 0;
+
+
+/*===============[ 0.1 Initialize Google Charts]=====================*/
+
+google.charts.load('current', {'packages':['corechart']});
 
 /* ===============[ 1. Firebase ]=========================*/
 /**
@@ -180,15 +188,19 @@ var updateCurrentUser = function () {
     $("#sign-out").show();
     $("#admin-login").hide();
     $("#active-visitors").show();
+    $("#all-charts").show();
+    $("#main-section").removeClass("mobile-width");
     $("#title-section").removeClass("jumbotron");
+    $("#title-section").addClass("top-absolute");
+
     var displayText = $("<h5>").html(CurrentUser.displayName);
     var displayImage = $("<img>").addClass("rounded").attr("src", CurrentUser.photoURL);
-    displayImage = $("<div>").addClass("text-center d-flex justify-center align-self-start image_wrap").html(displayImage);
+    displayImage = $("<div>").addClass("text-center image_wrap").html(displayImage);
 
     if ($(window).width() > 768) {
-      $("#main-avatar").append(displayText, displayImage);
+      $("#main-avatar").append(displayImage, displayText);
     } else {
-      $("#mobile-avatar").append(displayText, displayImage);
+      $("#mobile-avatar").append(displayImage, displayText);
     }
 
   } else {
@@ -204,7 +216,10 @@ var updateCurrentUser = function () {
     $("#sign-out").hide();
     $("#admin-login").show();
     $("#active-visitors").hide();
+    $("#all-charts").hide();
     $("#title-section").addClass("jumbotron");
+    $("#main-section").addClass("mobile-width");
+    $("#title-section").removeClass("top-absolute");
 
     if ($(window).width() > 768) {
       $("#main-avatar").empty();
@@ -237,13 +252,24 @@ var SignOut = function () {
   return;
 }; // END SignOut
 
+//======================================================================================================/
+/* The following function will run on any new connection, take advantage by getting any data need for charts
+as well as run your chart update function.
 //-------------------------------------[ 1.4 Active Viewers Watcher - START ]---------------------------
+*/
 // 1.4.1 Watch for new connections
 connectionsRef.on("value", function (snapshot) {
   // Display the viewer count in the html.
+
   // The number of online users is the number of children in the connections list.
   $("#watchers").text(snapshot.numChildren());
-
+  
+  barArray = [
+    ["Page","Users"]
+  ];
+  pieArray = [
+    ["Region","Users"]
+  ];
   var tableData = {};
   var uniqueKey = false;
   for (var i in snapshot.val()) {
@@ -285,7 +311,113 @@ connectionsRef.on("value", function (snapshot) {
         }
       }
     }
+    // Get ActivePage from each visitor and push to barArray ==========================================|
+
+    function activePageArray() {
+    if(snapshot.val()[i].hasOwnProperty("activePage")) {
+      var visitorPage = snapshot.val()[i]["activePage"];
+      // If array includes page string, add to the counter. Else, push new string to the array.
+      arrayCheck = 0;
+      for(b = 0; b < barArray.length; b++) {
+        // console.log(visitorPage)
+          if(barArray[b].includes(visitorPage)) {
+            var pageIndex = barArray.indexOf(visitorPage);
+            barArray[b][1] = (barArray[b][1] + 1);
+            // console.log("Pages" + barArray);
+            return;
+          }
+          else {
+            arrayCheck++;
+            // console.log("nonono")
+            if(arrayCheck === barArray.length) {
+            barArray.push([visitorPage , 0]);
+            // (console.log("Adding Page: " + visitorPage));
+            }
+          }
+      }
+      }
+      else {
+      barArray.push(["N/A",1]);
+      }
+  
+    };
+
+    // Get Region from each visitor and push to pieArray =============================================|
+    
+    function visitorRegionArray() {
+    if(snapshot.val()[i].hasOwnProperty("ip")) {
+    if(snapshot.val()[i]["ip"].hasOwnProperty("region")) {
+    var visitorRegion = snapshot.val()[i]["ip"]["region"];
+    // If array includes page string, add to the counter. Else, push new string to the array.
+    arrayCheck = 0;
+    for(b = 0; b < pieArray.length; b++) {
+        if(pieArray[b].includes(visitorRegion)) {
+          var pageIndex = pieArray.indexOf(visitorRegion);
+          pieArray[b][1] = (pieArray[b][1] + 1);
+          // (console.log("Regions" + pieArray));
+          return;
+        }
+        else {
+          arrayCheck++;
+          if(arrayCheck > 0 && arrayCheck === pieArray.length) {
+          pieArray.push([visitorRegion , 0]);
+          // (console.log("Adding Region: " + visitorRegion));
+          }
+        }
+    }
+    }
+    else {
+    pieArray.push(["N/A",1]);
+    }
+    }
+    else {
+    pieArray.push(["N/A",1]);
+    }
+  }
+    
+  // Draw Pie Chart Function ======================================================|
+    function pieChart(a,b) {
+  
+      var data = new google.visualization.arrayToDataTable(pieArray,false);
+      var chartOptions = {
+          title: a,
+          width: 380,
+          height: 300,
+  
+      };
+      
+      var chart = new google.visualization.PieChart(document.getElementById(b));
+  
+      chart.draw(data, chartOptions);
+  };
+  // Draw Bar Chart Function ======================================================|
+    function barChart(a,b) {
+    
+      var data = new google.visualization.arrayToDataTable(barArray,false);
+      var chartOptions = {
+          title: a,
+          width: 400,
+          height: 300,
+
+      };
+      
+      var chart = new google.visualization.BarChart(document.getElementById(b));
+
+      chart.draw(data, chartOptions);
+  };
+
+  // Functions to Update and Append Charts ======================================================================|
+
+  activePageArray();
+  visitorRegionArray();
+  pieChart("Visitors by Region","chart1");
+  barChart("Viewed Pages","chart2");
+
   } // END for(var property in snapshot.val()){
+
+  console.log("this pie " + pieArray);
+  console.log("this bar " + barArray);
+
 
   tableData['key'] = uniqueKey;
   AddToVisitorsTable(tableData);
@@ -293,7 +425,7 @@ connectionsRef.on("value", function (snapshot) {
   // Send Slack Message when alarms are hit
   var alarm1 = 10;
   var alarm2 = 15;
-  var alarm3 = 25;
+  var alarm3 = 20;
 
   // Going Up...
   if( snapshot.numChildren() >= alarm1 && lastAlarm < alarm1 ){
@@ -317,6 +449,9 @@ connectionsRef.on("value", function (snapshot) {
     lastAlarm=0;
     console.log("Alarm Reset");
   }
+
+  // ==============================[ GET CHART DATA ^ UP THERE ]============================
+  // ==============================[ PUT CHART UPDATE FUNCTION HERE ]============================
 
 }, function (errorObject) {
   console.log("The read failed: " + errorObject.code);
@@ -543,10 +678,13 @@ function RemoveFromVisitorsTable(uniqueKey) {
 } // END RemoveFromVisitorsTable
 
 /**
- * 2.9 updateVistorsTableDuration
+ * 2.9 updateVisitorsTableDuration
  * Updates the page duration column based on date-added.
+ * @todo
+ * AddToVisitorsTable
+ * updatecharts
  */
-function updateVistorsTableDuration() {
+function updateVisitorsTableDuration() {
   $("#active-visitors-table > tbody tr").each(function (i, el) {
     var page_duration = $(el).find("td:nth-child(3)").data("date-added");
 
@@ -557,7 +695,7 @@ function updateVistorsTableDuration() {
   });
 
   return;
-} // END updateVistorsTableDuration
+} // END updateVisitorsTableDuration
 
 /* ===============[ 3. Slack API ]=======================*/
 /**
@@ -566,10 +704,10 @@ function updateVistorsTableDuration() {
  * @param {string} channel - The slack channel to post the message in. 
  * @param {string} as_user - From User. If the provided user doesn't exist than the message will be sent from oauthToken owner. 
  */
-function sendSlackMessage(message, as_user="simplicityviaclarity", channel="simplicityviaclarity") {
+function sendSlackMessage(message, as_user="Christopher Collins", channel="simplicityviaclarity") {
   var ajaxURL = "https://slack.com/api/chat.postMessage";
-  var oauthToken_user = "xoxp-685838559649-715501489959-774346859890-00d61a81cc77046ca724abf6c0b45f06";
-  var oauthToken_bot = "xoxb-685838559649-789027187543-4NppAjFkus9INeWWROSI4Duf";
+  var oauthToken_user = "xoxp-685838559649-715501489959-792051786135-8f931b2585b48b3394174ad5a7a15a2d";
+  var oauthToken_bot = "xoxb-685838559649-789027187543-pxwML4L5eqEBJ5zfo96SGmam";
   
   if(message === undefined) {
     return;
@@ -591,8 +729,8 @@ function sendSlackMessage(message, as_user="simplicityviaclarity", channel="simp
   };
 
   console.log(data_object);
-  return; // <-------------------[ DISABLED FOR NOW ]------------------------
   ajaxPOST( ajaxURL, data_object, _success, _fail );
+  return;
 } // END sendSlackMessage
 
 /* ===============[ 4. Document Ready ]==================*/
@@ -605,7 +743,7 @@ $(function () {
    * 4.2 Start Clock and Update Page
    */
   startClock();
-  setInterval(updateVistorsTableDuration, 30 * 1000);
+  setInterval(updateVisitorsTableDuration, 5 * 1000);
 }); // END document ready
 
 /* ===============[ A. Debugging / Archived ]=======================*/

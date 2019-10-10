@@ -3,7 +3,7 @@
  * @package simplicityviaclarity
  * @subpackage svc client
  * @author Christopher C, Blake S, Sultan K
- * @version 2.1.1
+ * @version 2.2.0
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
