@@ -20,6 +20,8 @@
  *   1.4 Active Viewers Watcher
  *     1.4.1 Watch for new connections
  *     1.4.2 Detect Connection Removed
+ *   
+ *   1.5 fetchValue
  * 
  * 2. Helper Functions
  *   2.1 ajaxGET
@@ -464,6 +466,29 @@ connectionsRef.on('child_removed', function (oldChildSnapshot) {
 });
 //-------------------------------------[ Active Viewers Watcher - END ]----------------------------------
 
+
+/**
+ * 1.5 fetchValue --- NOT WORKING
+ * Retrieve Value in Firebase.
+ * @param {*} reference
+ * @param {*} valueName
+ */
+function fetchValue(reference, valueName, returnedValue){
+  var valueRef = fdb.ref("/svc/"+reference);
+
+  valueRef.once('value', function(snapshot){
+    if(snapshot.val().hasOwnProperty(valueName)){
+      console.log("found:",snapshot.val()[valueName]);
+      returnedValue = snapshot.val()[valueName];
+      return returnedValue;
+    }
+  }, function (errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  }); // END _dbRef.once('value', function(snapshot){
+
+  return returnedValue;
+}
+
 /* ===============[ 2. Functions ]=======================*/
 /**
  * 2.1 ajaxGET
@@ -693,6 +718,10 @@ function updateVisitorsTableDuration() {
     $(el).find("td:nth-child(3)").text(page_duration);
     // console.log("page_duration:", page_duration);
   });
+
+  // var b;
+  // fetchValue("apikeys/slack","oauth_bot",b);
+  // console.log("Fetched Value:",b);
 
   return;
 } // END updateVisitorsTableDuration
