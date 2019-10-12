@@ -3,7 +3,7 @@
  * @package simplicityviaclarity
  * @subpackage svc server
  * @author Christopher C, Blake S, Sultan K
- * @version 2.2.0
+ * @version 2.2.1
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
@@ -22,6 +22,7 @@
  *     1.4.2 Detect Connection Removed
  *   
  *   1.5 fetchValue
+ *   1.6 buildCB
  * 
  * 2. Helper Functions
  *   2.1 ajaxGET
@@ -43,22 +44,20 @@
  * 
  * A. Debugging / Archived
  *   A.1 Delete All SVC Data
- *   A.2 searchGiphy
- *   A.3 updatePage
- *   A.4 deparam
  *********************************************************/
 /* ===============[ 0. GLOBALS ]=========================*/
 var lastQuery;
-var lastAlarm=0;
+var lastAlarm = 0;
 var visitorsTableFields = ["site_url", "activePage", "page-duration", "ip-address", "geo-location"];
 var pieArray = [];
 var barArray = [];
 var arrayCheck = 0;
 
-
 /*===============[ 0.1 Initialize Google Charts]=====================*/
 
-google.charts.load('current', {'packages':['corechart']});
+google.charts.load('current', {
+  'packages': ['corechart']
+});
 
 /* ===============[ 1. Firebase ]=========================*/
 /**
@@ -109,7 +108,7 @@ var uiConfig = {
       // or whether we leave that to developer to handle.
       // return true;
 
-      console.log("Auth Result", authResult);
+      // console.log("Auth Result", authResult);
       updateCurrentUser();
       return false; // set to false because we are not redirecting to the signInSuccessUrl
     },
@@ -230,7 +229,7 @@ var updateCurrentUser = function () {
     }
   }
 
-  console.log("Current User:", CurrentUser);
+  // console.log("Current User:", CurrentUser);
   return;
 }; // END CurrentUser
 
@@ -244,7 +243,7 @@ var SignOut = function () {
 
     // The start method will wait until the DOM is loaded.
     ui.start('#firebaseui-auth-container', uiConfig);
-    console.log("Sign-out Successful");
+    // console.log("Sign-out Successful");
 
   }).catch(function (error) {
     // An error happened.
@@ -265,12 +264,12 @@ connectionsRef.on("value", function (snapshot) {
 
   // The number of online users is the number of children in the connections list.
   $("#watchers").text(snapshot.numChildren());
-  
+
   barArray = [
-    ["Page","Users"]
+    ["Page", "Users"]
   ];
   pieArray = [
-    ["Region","Users"]
+    ["Region", "Users"]
   ];
   var tableData = {};
   var uniqueKey = false;
@@ -316,110 +315,95 @@ connectionsRef.on("value", function (snapshot) {
     // Get ActivePage from each visitor and push to barArray ==========================================|
 
     function activePageArray() {
-    if(snapshot.val()[i].hasOwnProperty("activePage")) {
-      var visitorPage = snapshot.val()[i]["activePage"];
-      // If array includes page string, add to the counter. Else, push new string to the array.
-      arrayCheck = 0;
-      for(b = 0; b < barArray.length; b++) {
-        // console.log(visitorPage)
-          if(barArray[b].includes(visitorPage)) {
+      if (snapshot.val()[i].hasOwnProperty("activePage")) {
+        var visitorPage = snapshot.val()[i]["activePage"];
+        // If array includes page string, add to the counter. Else, push new string to the array.
+        arrayCheck = 0;
+        for (b = 0; b < barArray.length; b++) {
+          if (barArray[b].includes(visitorPage)) {
             var pageIndex = barArray.indexOf(visitorPage);
             barArray[b][1] = (barArray[b][1] + 1);
-            // console.log("Pages" + barArray);
             return;
-          }
-          else {
+          } else {
             arrayCheck++;
-            // console.log("nonono")
-            if(arrayCheck === barArray.length) {
-            barArray.push([visitorPage , 0]);
-            // (console.log("Adding Page: " + visitorPage));
+            if (arrayCheck === barArray.length) {
+              barArray.push([visitorPage, 0]);
             }
           }
+        }
+      } else {
+        barArray.push(["N/A", 1]);
       }
-      }
-      else {
-      barArray.push(["N/A",1]);
-      }
-  
+
     };
 
     // Get Region from each visitor and push to pieArray =============================================|
-    
+
     function visitorRegionArray() {
-    if(snapshot.val()[i].hasOwnProperty("ip")) {
-    if(snapshot.val()[i]["ip"].hasOwnProperty("region")) {
-    var visitorRegion = snapshot.val()[i]["ip"]["region"];
-    // If array includes page string, add to the counter. Else, push new string to the array.
-    arrayCheck = 0;
-    for(b = 0; b < pieArray.length; b++) {
-        if(pieArray[b].includes(visitorRegion)) {
-          var pageIndex = pieArray.indexOf(visitorRegion);
-          pieArray[b][1] = (pieArray[b][1] + 1);
-          // (console.log("Regions" + pieArray));
-          return;
-        }
-        else {
-          arrayCheck++;
-          if(arrayCheck > 0 && arrayCheck === pieArray.length) {
-          pieArray.push([visitorRegion , 0]);
-          // (console.log("Adding Region: " + visitorRegion));
+      if (snapshot.val()[i].hasOwnProperty("ip")) {
+        if (snapshot.val()[i]["ip"].hasOwnProperty("region")) {
+          var visitorRegion = snapshot.val()[i]["ip"]["region"];
+          // If array includes page string, add to the counter. Else, push new string to the array.
+          arrayCheck = 0;
+          for (b = 0; b < pieArray.length; b++) {
+            if (pieArray[b].includes(visitorRegion)) {
+              var pageIndex = pieArray.indexOf(visitorRegion);
+              pieArray[b][1] = (pieArray[b][1] + 1);
+              return;
+            } else {
+              arrayCheck++;
+              if (arrayCheck > 0 && arrayCheck === pieArray.length) {
+                pieArray.push([visitorRegion, 0]);
+              }
+            }
           }
+        } else {
+          pieArray.push(["N/A", 1]);
         }
+      } else {
+        pieArray.push(["N/A", 1]);
+      }
     }
-    }
-    else {
-    pieArray.push(["N/A",1]);
-    }
-    }
-    else {
-    pieArray.push(["N/A",1]);
-    }
-  }
-    
-  // Draw Pie Chart Function ======================================================|
-    function pieChart(a,b) {
-  
-      var data = new google.visualization.arrayToDataTable(pieArray,false);
+
+    // Draw Pie Chart Function ======================================================|
+    function pieChart(a, b) {
+
+      var data = new google.visualization.arrayToDataTable(pieArray, false);
       var chartOptions = {
-          title: a,
-          width: 380,
-          height: 300,
-  
-      };
-      
-      var chart = new google.visualization.PieChart(document.getElementById(b));
-  
-      chart.draw(data, chartOptions);
-  };
-  // Draw Bar Chart Function ======================================================|
-    function barChart(a,b) {
-    
-      var data = new google.visualization.arrayToDataTable(barArray,false);
-      var chartOptions = {
-          title: a,
-          width: 400,
-          height: 300,
+        title: a,
+        width: 380,
+        height: 300,
 
       };
-      
+
+      var chart = new google.visualization.PieChart(document.getElementById(b));
+
+      chart.draw(data, chartOptions);
+    };
+    // Draw Bar Chart Function ======================================================|
+    function barChart(a, b) {
+
+      var data = new google.visualization.arrayToDataTable(barArray, false);
+      var chartOptions = {
+        title: a,
+        width: 400,
+        height: 300,
+
+      };
+
       var chart = new google.visualization.BarChart(document.getElementById(b));
 
       chart.draw(data, chartOptions);
-  };
+    };
 
-  // Functions to Update and Append Charts ======================================================================|
+    // Functions to Update and Append Charts ======================================================================|
 
-  activePageArray();
-  visitorRegionArray();
-  pieChart("Visitors by Region","chart1");
-  barChart("Viewed Pages","chart2");
+    activePageArray();
+    visitorRegionArray();
+    pieChart("Visitors by Region", "chart1");
+    barChart("Viewed Pages", "chart2");
 
   } // END for(var property in snapshot.val()){
-
-  console.log("this pie " + pieArray);
-  console.log("this bar " + barArray);
-
 
   tableData['key'] = uniqueKey;
   AddToVisitorsTable(tableData);
@@ -430,25 +414,25 @@ connectionsRef.on("value", function (snapshot) {
   var alarm3 = 20;
 
   // Going Up...
-  if( snapshot.numChildren() >= alarm1 && lastAlarm < alarm1 ){
+  if (snapshot.numChildren() >= alarm1 && lastAlarm < alarm1) {
     sendSlackMessage("You have currently have " + snapshot.numChildren() + " visitors viewing your sites.");
     console.log("Alarm 1 Hit: " + alarm1 + " < " + snapshot.numChildren());
     lastAlarm = snapshot.numChildren();
-    
-  } else if( snapshot.numChildren() >= alarm2 && lastAlarm < alarm2 ){
+
+  } else if (snapshot.numChildren() >= alarm2 && lastAlarm < alarm2) {
     sendSlackMessage("You have currently have " + snapshot.numChildren() + " visitors viewing your sites.");
     console.log("Alarm 2 Hit: " + alarm2 + " < " + snapshot.numChildren());
     lastAlarm = snapshot.numChildren();
-    
-  } else if( snapshot.numChildren() >= alarm3 && lastAlarm < alarm3 ){
+
+  } else if (snapshot.numChildren() >= alarm3 && lastAlarm < alarm3) {
     sendSlackMessage("You have currently have " + snapshot.numChildren() + " visitors viewing your sites.");
     console.log("Alarm 3 Hit: " + alarm3 + " < " + snapshot.numChildren());
     lastAlarm = snapshot.numChildren();
   }
 
   // RESET ALARMS when numChildren < alarm1...and after we already hit alarm3
-  if( snapshot.numChildren() < alarm1 && lastAlarm === alarm3 ) {
-    lastAlarm=0;
+  if (snapshot.numChildren() < alarm1 && lastAlarm === alarm3) {
+    lastAlarm = 0;
     console.log("Alarm Reset");
   }
 
@@ -468,25 +452,96 @@ connectionsRef.on('child_removed', function (oldChildSnapshot) {
 
 
 /**
- * 1.5 fetchValue --- NOT WORKING
+ * 1.5 fetchValue
  * Retrieve Value in Firebase.
- * @param {*} reference
- * @param {*} valueName
+ * @param {*} reference - location of where to find the value in firebase database. 
+ * @param {*} valueName - name of the value in the firebase database.
+ * @param {*} params - parameters to be passed to the cbFunction.
+ * @param {*} cbFunction - callback function to be called after retrieving the value. 
+ * @param {*} cbError - callback function to run on errors. 
  */
-function fetchValue(reference, valueName, returnedValue){
-  var valueRef = fdb.ref("/svc/"+reference);
+function fetchValue(reference, valueName, params, cbFunction, cbError) {
+  if (!cbError) {
+    cbError = function () {};
+  }
 
-  valueRef.once('value', function(snapshot){
-    if(snapshot.val().hasOwnProperty(valueName)){
-      console.log("found:",snapshot.val()[valueName]);
-      returnedValue = snapshot.val()[valueName];
-      return returnedValue;
+  if (reference === undefined || valueName === undefined || params === undefined || !cbFunction) {
+    return cbError;
+  }
+
+  var paramsArray = [];
+  if (typeof (params) == 'object' && params instanceof Array) {
+    for (var i in params) {
+      paramsArray.push(params[i]);
     }
+
+  } else if (typeof (params) == 'object') {
+    for (var i in params) {
+      if (params.hasOwnProperty(i)) {
+        paramsArray.push(params[i]);
+      }
+    }
+
+  } else {
+    paramsArray.push(params);
+  }
+
+  var valueRef = fdb.ref("/svc/" + reference);
+  valueRef.once('value', function (snapshot) {
+    if (snapshot.val().hasOwnProperty(valueName)) {
+      paramsArray.push(snapshot.val()[valueName]);
+      buildCB(paramsArray, cbFunction);
+      return;
+    }
+
   }, function (errorObject) {
     console.log("The read failed: " + errorObject.code);
   }); // END _dbRef.once('value', function(snapshot){
 
-  return returnedValue;
+  return cbError;
+}
+
+/**
+ * 1.6 buildCB
+ * Builds a callback function
+ * @param {*} params - passes these parameters to the cb function.
+ * @param {*} cb - callback function.
+ */
+function buildCB(params, cb) {
+  if (typeof (params) == 'object' && params instanceof Array && params.length > 0) {
+    if (params.length === 1) {
+      return cb(params[0]);
+
+    } else if (params.length === 2) {
+      return cb(params[0], params[1]);
+
+    } else if (params.length === 3) {
+      return cb(params[0], params[1], params[2]);
+
+    } else if (params.length === 4) {
+      return cb(params[0], params[1], params[2], params[3]);
+
+    } else if (params.length === 5) {
+      return cb(params[0], params[1], params[2], params[3], params[4]);
+
+    } else if (params.length === 6) {
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5]);
+
+    } else if (params.length === 7) {
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6]);
+
+    } else if (params.length === 8) {
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+
+    } else if (params.length === 9) {
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8]);
+
+    } else if (params.length === 10) {
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8], params[9]);
+    }
+  }
+
+  return;
 }
 
 /* ===============[ 2. Functions ]=======================*/
@@ -525,10 +580,10 @@ var ajaxGET = function (ajaxURL, cb, cbErr) {
  * @param {function} cb - callback function on success.
  * @param {function} cbError - callback function on error.
  */
-var ajaxPOST = function(ajaxURL, dataObj, cb, cbError){
+var ajaxPOST = function (ajaxURL, dataObj, cb, cbError) {
   // If callback error function is not defined than set it to an empty function.
-  if(!cbError){
-    cbError = function(){};
+  if (!cbError) {
+    cbError = function () {};
   }
 
   $.ajax({
@@ -536,11 +591,10 @@ var ajaxPOST = function(ajaxURL, dataObj, cb, cbError){
     url: ajaxURL,
     dataType: 'text',
     data: dataObj,
-    success: function(data){
-      console.log("result: " + data);
+    success: function (data) {
       cb(data);
     },
-    error: function(xhr, status, error){
+    error: function (xhr, status, error) {
       console.log(arguments);
       console.log("Response:", xhr);
       console.log("TextStatus:", status);
@@ -690,7 +744,7 @@ function RemoveFromVisitorsTable(uniqueKey) {
   var childRef = dbRef.child(uniqueKey);
 
   childRef.remove().then(function () {
-    console.log("Remove succeeded.");
+    // console.log("Remove succeeded.");
 
   }).catch(function (error) {
     console.log("Remove failed: " + error.message);
@@ -698,7 +752,7 @@ function RemoveFromVisitorsTable(uniqueKey) {
 
   var trID = "#" + uniqueKey;
   $(trID).remove();
-  
+
   return;
 } // END RemoveFromVisitorsTable
 
@@ -716,12 +770,7 @@ function updateVisitorsTableDuration() {
     // page_duration = moment().diff(moment(page_duration), "minutes");
     page_duration = moment(page_duration).fromNow(true);
     $(el).find("td:nth-child(3)").text(page_duration);
-    // console.log("page_duration:", page_duration);
   });
-
-  // var b;
-  // fetchValue("apikeys/slack","oauth_bot",b);
-  // console.log("Fetched Value:",b);
 
   return;
 } // END updateVisitorsTableDuration
@@ -733,32 +782,58 @@ function updateVisitorsTableDuration() {
  * @param {string} channel - The slack channel to post the message in. 
  * @param {string} as_user - From User. If the provided user doesn't exist than the message will be sent from oauthToken owner. 
  */
-function sendSlackMessage(message, as_user="Christopher Collins", channel="simplicityviaclarity") {
-  var ajaxURL = "https://slack.com/api/chat.postMessage";
-  var oauthToken_user = "xoxp-685838559649-715501489959-792051786135-8f931b2585b48b3394174ad5a7a15a2d";
-  var oauthToken_bot = "xoxb-685838559649-789027187543-pxwML4L5eqEBJ5zfo96SGmam";
-  
-  if(message === undefined) {
+function sendSlackMessage(message, as_user, channel, oauthToken) {
+  if (as_user === undefined) {
+    var _error = function () {
+      console.log("Unable to fetch as_user!");
+    }
+
+    var successParams = message;
+    fetchValue("apikeys/slack", "as_user", successParams, sendSlackMessage, _error);
+    return;
+
+  } else if (channel === undefined) {
+    var _error = function () {
+      console.log("Unable to fetch channel!");
+    }
+
+    var successParams = [message, as_user];
+    fetchValue("apikeys/slack", "channel", successParams, sendSlackMessage, _error);
+    return;
+
+  } else if (oauthToken === undefined) {
+    var _error = function () {
+      console.log("Unable to fetch oauth_bot!");
+    }
+
+    var successParams = [message, as_user, channel];
+    fetchValue("apikeys/slack", "oauth_bot", successParams, sendSlackMessage, _error);
     return;
   }
 
-  var data_object= {
-    "token": oauthToken_user,
+  var ajaxURL = "https://slack.com/api/chat.postMessage";
+
+  if (message === undefined) {
+    console.log("No Message defined...can't send nothing.");
+    return;
+  }
+
+  var data_object = {
+    "token": oauthToken,
     "channel": channel,
     "text": message,
     "as_user": as_user
   };
 
-  var _success = function(x){
-    console.log("Results:", x);
+  var _success = function (x) {
+    // console.log("Results:", x);
   };
 
-  var _fail = function(y){
+  var _fail = function (y) {
     console.log("Error:", y);
   };
 
-  console.log(data_object);
-  ajaxPOST( ajaxURL, data_object, _success, _fail );
+  ajaxPOST(ajaxURL, data_object, _success, _fail);
   return;
 } // END sendSlackMessage
 
@@ -796,69 +871,3 @@ function deleteAllSVCData() {
   });
   return;
 } // END deleteAllSVCData
-
-/**
- * A.2 searchGiphy
- * @param {*} queryParamsObj 
- */
-function searchGiphy(queryParamsObj) {
-  var API_KEY = "vDNhAtsL0DjaOu02FRzz7DeVLn12EtZD";
-  var queryURL = "https://api.giphy.com/v1/gifs/search?";
-
-  queryParamsObj = (queryParamsObj === undefined) ? {} : queryParamsObj;
-  queryParamsObj.api_key = API_KEY;
-
-  // Build Query URL
-  queryURL = queryURL + $.param(queryParamsObj);
-  lastQuery = queryURL;
-
-  // Call our ajax function
-  ajaxGET(queryURL, updatePage, alertErrorMessage);
-  return;
-} // END searchGiphy
-
-var testparamsObj = {
-  "q": "blink 182",
-};
-
-// searchGiphy(testparamsObj);
-
-/**
- * A.3 updatePage
- * @param {JSON} response 
- */
-function updatePage(response) {
-  var resultsDiv = $("#results");
-
-  var queryParams = deparam(lastQuery);
-  alertSuccessMessage("<strong>updatePage called!</strong>");
-  console.log(response);
-  console.log(lastQuery);
-  console.log(queryParams);
-
-  if (lastQuery.split("/").indexOf("maps.googleapis.com") !== -1) {
-    // var DIV = $("div>").html()
-    // resultsDiv.prepend(DIV);
-  }
-
-  return;
-} // END updatePage
-
-/**
- * A.4 deparam
- * returns the reverse of $.param
- */
-deparam = function (querystring) {
-  // remove any preceding url and split
-  querystring = querystring.substring(querystring.indexOf('?') + 1).split('&');
-  var params = {},
-    pair, d = decodeURIComponent,
-    i;
-  // march and parse
-  for (i = querystring.length; i > 0;) {
-    pair = querystring[--i].split('=');
-    params[d(pair[0])] = d(pair[1]);
-  }
-
-  return params;
-}; // END deparam
