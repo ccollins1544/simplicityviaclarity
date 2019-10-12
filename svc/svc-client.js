@@ -10,8 +10,8 @@
  * 1. Firebase
  *   1.1 Firebase Configuration
  *   1.2 Initialize Firebase
- *   1.3 fetchValue --- missing
- *   1.4 buildCB --- missing
+ *   1.3 fetchValue
+ *   1.4 buildCB
  * 
  * 2. Helper Functions
  *   2.1 loadXMLDoc
@@ -433,7 +433,7 @@ function ipGeoLocation(ip, apikey) {
 
       // Save svcData to LocalStorage
       localStorage.setItem("svc_data", JSON.stringify(svcData));
-      console.log("Got ipGeoLocation", svcData);
+      // console.log("ipGeoLocation", svcData);
     }
   });
 
