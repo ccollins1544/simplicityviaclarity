@@ -3,13 +3,15 @@
  * @package simplicityviaclarity
  * @subpackage svc client
  * @author Christopher C, Blake S, Sultan K
- * @version 2.2.0
+ * @version 2.2.1
  * ===============[ TABLE OF CONTENTS ]===================
  * 0. Globals
  * 
  * 1. Firebase
  *   1.1 Firebase Configuration
  *   1.2 Initialize Firebase
+ *   1.3 fetchValue --- missing
+ *   1.4 buildCB --- missing
  * 
  * 2. Helper Functions
  *   2.1 loadXMLDoc
@@ -63,6 +65,99 @@ var _connectionsRef = _fdb.ref("/svc/connections");
 // the client's connection state changes.
 // '.info/connected' is a boolean value, true if the client is connected and false if they are not.
 var _connectedRef = _fdb.ref(".info/connected");
+
+/**
+ * 1.3 fetchValue
+ * Retrieve Value in Firebase.
+ * @param {*} reference - location of where to find the value in firebase database. 
+ * @param {*} valueName - name of the value in the firebase database.
+ * @param {*} params - parameters to be passed to the cbFunction.
+ * @param {*} cbFunction - callback function to be called after retrieving the value. 
+ * @param {*} cbError - callback function to run on errors. 
+ */
+function fetchValue(reference, valueName, params, cbFunction, cbError){
+  if(!cbError){
+    cbError = function(){};
+  }
+
+  if(reference === undefined || valueName === undefined || params === undefined || !cbFunction ){
+    return cbError;
+  }
+
+  var paramsArray = [];
+  if(typeof(params) == 'object' && params instanceof Array ){
+    for(var i in params){
+      paramsArray.push(params[i]);
+    }
+    
+  }else if(typeof(params) == 'object' ){
+    for(var i in params ){
+      if(params.hasOwnProperty(i)){
+        paramsArray.push(params[i]);
+      }
+    }
+    
+  }else{
+    paramsArray.push(params);
+  }
+
+  var valueRef = _fdb.ref("/svc/"+reference);
+  valueRef.once('value', function(snapshot){
+    if(snapshot.val().hasOwnProperty(valueName)){
+      paramsArray.push(snapshot.val()[valueName]);
+      buildCB(paramsArray, cbFunction);
+      return;
+    }
+
+  }, function (errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  }); // END _dbRef.once('value', function(snapshot){
+
+  return cbError;
+}
+
+/**
+ * 1.4 buildCB
+ * Builds a callback function
+ * @param {*} params - passes these parameters to the cb function.
+ * @param {*} cb - callback function.
+ */
+function buildCB(params, cb){
+  if(typeof(params) == 'object' && params instanceof Array && params.length > 0){
+    if(params.length === 1){
+      return cb(params[0]);
+
+    } else if(params.length === 2){
+      return cb(params[0], params[1]);
+    
+    } else if(params.length === 3){
+      return cb(params[0], params[1], params[2]);
+    
+    } else if(params.length === 4){
+      return cb(params[0], params[1], params[2], params[3]);
+    
+    } else if(params.length === 5){
+      return cb(params[0], params[1], params[2], params[3], params[4]);
+
+    } else if(params.length === 6){
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5]);
+    
+    } else if(params.length === 7){
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6]);
+    
+    } else if(params.length === 8){
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+    
+    } else if(params.length === 9){
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8]);
+    
+    } else if(params.length === 10){
+      return cb(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8], params[9]);
+    }
+  }
+
+  return;
+}
 
 /** ===============[ 2. Helper Functions ]================
  * 2.1 loadXMLDoc
@@ -181,7 +276,7 @@ function getHeaders() {
   for (var key in data) {
     if (key != "")
       display += "<b>" + key + "</b> : " + data[key] + "<br>";
-    console.log(key + " : " + data[key]);
+    // console.log(key + " : " + data[key]);
   }
   // document.getElementById("dump").innerHTML = display;
   return display;
@@ -281,7 +376,7 @@ function build_svcData() {
   if (siteFound === false || pageFound === false) {
     // Save svcData to LocalStorage
     localStorage.setItem("svc_data", JSON.stringify(svcData));
-    console.log("build_svcData", svcData);
+    // console.log("build_svcData", svcData);
   } else {
     console.log("Already saved site in localStorage", svcData.site_url);
   }
@@ -292,8 +387,9 @@ function build_svcData() {
 /**
  * 3.2 ipGeoLocation
  * @param {string} ip 
+ * @param {string} apikey
  */
-function ipGeoLocation(ip) {
+function ipGeoLocation(ip, apikey) {
   // Get IP if it's undefined
   if (ip === undefined) {
     var _ip = function (r) {
@@ -301,7 +397,7 @@ function ipGeoLocation(ip) {
     };
 
     var _c = function (r) {
-      console.log(r);
+      // console.log(r);
     };
 
     loadXMLDoc("https://api.ipify.org?format=json", _ip, _c);
@@ -310,10 +406,19 @@ function ipGeoLocation(ip) {
     // Check if locally stored IP is the same as current ip
     if (svcData.ip.hasOwnProperty('address')) {
       if (svcData.ip.address === ip) {
-        console.log('Already saved this ip to localStorage', ip);
+        // console.log('Already saved this ip to localStorage', ip);
         return;
       }
     }
+  }
+
+  if(apikey === undefined){
+    var _error = function(){
+      console.log("Unable to fetch apikey!");
+    }
+
+    fetchValue("apikeys/apility", "apikey", ip, ipGeoLocation, _error);
+    return;
   }
 
   // Fetch IPGeoLocation data and save it
@@ -328,16 +433,15 @@ function ipGeoLocation(ip) {
 
       // Save svcData to LocalStorage
       localStorage.setItem("svc_data", JSON.stringify(svcData));
-      console.log("ipGeoLocation", svcData);
+      console.log("Got ipGeoLocation", svcData);
     }
   });
 
-  var API_KEY = "0acc44c0f4msh221a1ccbfc7d4d9p13dc6bjsn4e0e4d40f033";
   var queryURL = "https://apility-io-ip-geolocation-v1.p.rapidapi.com/" + ip;
 
   xhr.open("GET", queryURL);
   xhr.setRequestHeader("x-rapidapi-host", "apility-io-ip-geolocation-v1.p.rapidapi.com");
-  xhr.setRequestHeader("x-rapidapi-key", API_KEY);
+  xhr.setRequestHeader("x-rapidapi-key", apikey);
   xhr.setRequestHeader("accept", "application/json");
 
   xhr.send(data);
