@@ -55,7 +55,7 @@
   --secondary-menu-text: #F0F5F9;
   --secondary-menu-background: rgba(0, 0, 0, 0.8);
   --body-text: #1E2022;
-  --body-background: #F0F5F9;
+  --body-background: rgba(153, 170, 181, 0.55);
   --button-text: #C9D6Df;
   --button-background: #1E2022;
   --cool-red: #E9290F;
@@ -87,7 +87,8 @@ h6 {
 body.page-template {
   font-family: "Ubuntu";
   color: var(--body-text);
-  background: url('../images/black_paper_800x800.png')
+  /* background: url('../images/black_paper_800x800.png'); */
+  background-color: var(--body-background);
 }
 
 article#main-container {

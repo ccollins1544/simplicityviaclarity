@@ -450,7 +450,6 @@ connectionsRef.on('child_removed', function (oldChildSnapshot) {
 });
 //-------------------------------------[ Active Viewers Watcher - END ]----------------------------------
 
-
 /**
  * 1.5 fetchValue
  * Retrieve Value in Firebase.
